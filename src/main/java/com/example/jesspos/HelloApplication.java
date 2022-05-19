@@ -45,9 +45,14 @@ public class HelloApplication extends Application {
     public void home(Stage stage) {
         sceneClear();
         stage.setTitle("JessPOS - Home");
-        MenuBtn account;
+        MenuBtn account = null;
         if(signedIn) {
-            account = new MenuBtn(("Currently signed in as: " + FH.getEmployeesFile().getEmployee(employeeID).getName() + ". (ID: " + employeeID + ")"), "btn-secondary", "Access your timetable");
+            try {
+                account = new MenuBtn(("Currently signed in as: " + FH.getEmployeesFile().getEmployee(employeeID).getName() + ". (ID: " + employeeID + ")" +
+                        "\nSince: " + FH.getTimesFile().getLastTime(employeeID)), "btn-secondary", "Access your timetable");
+            } catch (TimeLog.TimeNotFoundException e) {
+                e.printStackTrace();
+            }
             account.setOnAction(actionEvent -> employee(stage));
         } else {
             account = new MenuBtn("Currently not signed in.", "", "Sign in");
@@ -209,11 +214,11 @@ public class HelloApplication extends Application {
                 new PropertyValueFactory<Transaction, Integer>("ID"));
         TableColumn DateCol = new TableColumn("Date");
         DateCol.setCellValueFactory(
-                new PropertyValueFactory<Transaction, Instant>("date"));
+                new PropertyValueFactory<Transaction, String>("date"));
         TableColumn ItemsCountCol = new TableColumn("Number of items");
         ItemsCountCol.setCellValueFactory(
                 new PropertyValueFactory<Transaction, Integer>("itemsCount"));
-        TableColumn PriceDeltaCol = new TableColumn("Total cost");
+        TableColumn PriceDeltaCol = new TableColumn("Total cost (CAD $)");
         PriceDeltaCol.setCellValueFactory(
                 new PropertyValueFactory<Transaction, Integer>("priceDelta"));
 
@@ -302,7 +307,9 @@ public class HelloApplication extends Application {
         addButton.setDefaultButton(true);
         MenuBtn removeButton = new MenuBtn("Remove", "btn-danger", "Remove highlighted row");
         removeButton.setOnAction(actionEvent -> {
-            savedItems.remove((Item) tbv.getSelectionModel().getSelectedItem());
+            Item i = (Item) tbv.getSelectionModel().getSelectedItem();
+            savedItems.remove(i);
+            FH.getInventoryFile().incrementItem(i.getSKU());
             tbv.setItems(FXCollections.observableArrayList(savedItems));
         });
         MenuBtn endButton = new MenuBtn("End transaction", "btn-warning", "End transaction");
@@ -367,10 +374,10 @@ public class HelloApplication extends Application {
         schedule.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         TableColumn pinCol = new TableColumn("Punch in");
         pinCol.setCellValueFactory(
-                new PropertyValueFactory<Time, Instant>("pin"));
+                new PropertyValueFactory<Time, String>("conpin"));
         TableColumn poutCol = new TableColumn("Punch out");
         poutCol.setCellValueFactory(
-                new PropertyValueFactory<Time, Instant>("pout"));
+                new PropertyValueFactory<Time, String>("conpout"));
         TableColumn deltaCol = new TableColumn("Shift length (minutes)");
         deltaCol.setCellValueFactory(
                 new PropertyValueFactory<Time, Long>("delta"));
@@ -392,12 +399,9 @@ public class HelloApplication extends Application {
             if(verifyAdmin.getEditor().getText().equals("p4$$w0rd")) {
                 UIAlert success = new UIAlert("Success", "Admin privileges enabled and employee added", ButtonType.OK, ButtonType.CANCEL);
                 success.showAndWait();
-                if (success.getResult() == ButtonType.OK) {
-                    FH.getEmployeesFile().addEmployee(addName.getText());
-                    tbv.setItems(FH.getEmployeesFile().getEmployees());
-                } else {
-                    success.close();
-                }
+                FH.getEmployeesFile().addEmployee(addName.getText());
+                tbv.setItems(FH.getEmployeesFile().getEmployees());
+                addName.clear();
             } else {
                 UIAlert failure = new UIAlert("Failure", "Password incorrect", ButtonType.OK, ButtonType.CLOSE);
                 failure.showAndWait();

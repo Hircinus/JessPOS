@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -70,5 +72,20 @@ public class TimeLog extends FileHandler {
             }
         }
         return output;
+    }
+    public String getLastTime(int ID) throws TimeNotFoundException {
+        for(String[] parts : scanSrc()) {
+            int currentID = Integer.parseInt(parts[0]);
+            if(currentID==ID&&parts[1].equals(parts[2])) {
+                Time currentTime = new Time(ID, Instant.parse(parts[1]), Instant.parse(parts[2]));
+                return currentTime.getConpin();
+            }
+        }
+        throw new TimeNotFoundException(ID);
+    }
+    public class TimeNotFoundException extends Exception {
+        public TimeNotFoundException(int ID) {
+            super("Time entry not found for user with ID: " + ID);
+        }
     }
 }

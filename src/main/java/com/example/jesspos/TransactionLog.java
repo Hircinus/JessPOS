@@ -83,7 +83,7 @@ public class TransactionLog extends FileHandler {
                     itemSKUs.append(";").append(items.get(i).getSKU());
                 }
             }
-            String input = newTrans.getID() + "," + newTrans.getEmployee().getName() + "," + newTrans.getDate() + "," + newTrans.getItemsCount() + "," + newTrans.getPriceDelta() + "," + itemSKUs;
+            String input = newTrans.getID() + "," + newTrans.getEmployee().getName() + "," + newTrans.getRawDate() + "," + newTrans.getItemsCount() + "," + newTrans.getPriceDelta() + "," + itemSKUs;
             scanner.useDelimiter("^.+\n$");
             while(scanner.hasNext()) {
                 writer.println(scanner.nextLine());
