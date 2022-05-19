@@ -1,11 +1,8 @@
 package com.example.jesspos;
 
-import java.util.ArrayList;
-
 public class Employee {
     private int ID;
     private String name;
-    private ArrayList<Time> times  = new ArrayList<>();
 
     public Employee(int ID, String name) {
         this.ID = ID;

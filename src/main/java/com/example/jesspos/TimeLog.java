@@ -16,18 +16,11 @@ public class TimeLog extends FileHandler {
     }
     public ObservableList<Time> getTimes(int ID) {
         ArrayList<Time> output = new ArrayList<>();
-        try (
-                Scanner scanner = new Scanner(getSource())) {
-            while (scanner.hasNext()) {
-                String[] parts = scanner.nextLine().split(",");
-                int currentID = Integer.parseInt(parts[0]);
-                if(currentID==ID) {
-                    output.add(new Time(ID, Instant.parse(parts[1]),Instant.parse(parts[2])));
-                }
+        for(String[] parts : scanSrc()) {
+            int currentID = Integer.parseInt(parts[0]);
+            if(currentID==ID) {
+                output.add(new Time(ID, Instant.parse(parts[1]),Instant.parse(parts[2])));
             }
-        } catch (
-                FileNotFoundException fnfe) {
-            fnfe.printStackTrace();
         }
         return FXCollections.observableArrayList(output);
     }
@@ -57,7 +50,6 @@ public class TimeLog extends FileHandler {
                 String[] parts = currentLine.split(",");
                 if(Integer.parseInt(parts[0]) == ID && parts[2].equals(parts[1])) {
                     input = ID + "," + parts[1] + "," + Instant.now();
-                    continue;
                 } else {
                     writer.println(currentLine);
                 }
@@ -71,18 +63,11 @@ public class TimeLog extends FileHandler {
     }
     public int getSignedInID() {
         int output = 0;
-        try (
-                Scanner scanner = new Scanner(getSource())) {
-            while (scanner.hasNext()) {
-                String[] parts = scanner.nextLine().split(",");
-                int currentID = Integer.parseInt(parts[0]);
-                if(parts[1].equals(parts[2])) {
-                    output = currentID;
-                }
+        for(String[] parts : scanSrc()) {
+            int currentID = Integer.parseInt(parts[0]);
+            if(parts[1].equals(parts[2])) {
+                output = currentID;
             }
-        } catch (
-                FileNotFoundException fnfe) {
-            fnfe.printStackTrace();
         }
         return output;
     }

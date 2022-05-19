@@ -15,66 +15,25 @@ public class EmployeeLog extends FileHandler {
         super(source);
     }
     public Employee getEmployee(String name) {
-        try (
-                Scanner scanner = new Scanner(getSource())) {
-            while (scanner.hasNext()) {
-                String[] parts = scanner.nextLine().split(",");
-                if(!name.toLowerCase().equals(parts[1].toLowerCase())) {
-                    continue;
-                } else {
-                    return new Employee(Integer.parseInt(parts[0]), parts[1]);
-                }
-            }
-        } catch (
-                FileNotFoundException fnfe) {
-            fnfe.printStackTrace();
+        for(String[] parts : scanSrc()) {
+            if(name.equalsIgnoreCase(parts[1]))
+                return new Employee(Integer.parseInt(parts[0]), parts[1]);
         }
         return null;
     }
     public Employee getEmployee(int ID) {
-        try (
-                Scanner scanner = new Scanner(getSource())) {
-            while (scanner.hasNext()) {
-                String[] parts = scanner.nextLine().split(",");
-                if(ID!=Integer.parseInt(parts[0])) {
-                    continue;
-                } else {
-                    return new Employee(ID, parts[1]);
-                }
-            }
-        } catch (
-                FileNotFoundException fnfe) {
-            fnfe.printStackTrace();
+        for(String[] parts : scanSrc()) {
+            if(ID==Integer.parseInt(parts[0]))
+                return new Employee(ID, parts[1]);
         }
         return null;
     }
     public ObservableList<Employee> getEmployees() {
         ArrayList<Employee> output = new ArrayList<>();
-        try (
-                Scanner scanner = new Scanner(getSource())) {
-            while (scanner.hasNext()) {
-                String[] parts = scanner.nextLine().split(",");
-                output.add(new Employee(Integer.parseInt(parts[0]),parts[1]));
-            }
-        } catch (
-                FileNotFoundException fnfe) {
-            fnfe.printStackTrace();
+        for(String[] parts : scanSrc()) {
+            output.add(new Employee(Integer.parseInt(parts[0]),parts[1]));
         }
         return FXCollections.observableArrayList(output);
-    }
-    public int getNextID() {
-        int last = 0;
-        try (
-                Scanner scanner = new Scanner(getSource())) {
-            scanner.useDelimiter("^.+\n$");
-            while (scanner.hasNext()) {
-                last = Integer.parseInt(scanner.nextLine().split(",")[0]);
-            }
-        } catch (
-                FileNotFoundException fnfe) {
-            fnfe.printStackTrace();
-        }
-        return ++last;
     }
     public void addEmployee(String name) {
         try (Scanner scanner = new Scanner(getSource());

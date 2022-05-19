@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class FileHandler {
@@ -49,9 +51,29 @@ public class FileHandler {
         return transactions;
     }
 
-    public void setSource(File source) {
-        this.source = source;
+    public ArrayList<String[]> scanSrc() {
+        ArrayList<String[]> output = new ArrayList<>();
+        try (
+                Scanner scanner = new Scanner(getSource())) {
+            while (scanner.hasNext()) {
+                String[] parts = scanner.nextLine().split(",");
+                output.add(parts);
+            }
+        } catch (
+                FileNotFoundException fnfe) {
+            fnfe.printStackTrace();
+        }
+        return output;
     }
+
+    public int getItemsCount() {
+        int count = 0;
+        for(String[] parts : scanSrc()) {
+            count++;
+        }
+        return count;
+    }
+
     public void moveFileTo(File file1, File file2) {
         try (Scanner scanner = new Scanner(file2);
              PrintWriter writer = new PrintWriter(file1)) {
@@ -64,5 +86,20 @@ public class FileHandler {
         } finally {
             file2.delete();
         }
+    }
+
+    public int getNextID() {
+        int last = 0;
+        try (
+                Scanner scanner = new Scanner(getSource())) {
+            scanner.useDelimiter("^.+\n$");
+            while (scanner.hasNext()) {
+                last = Integer.parseInt(scanner.nextLine().split(",")[0]);
+            }
+        } catch (
+                FileNotFoundException fnfe) {
+            fnfe.printStackTrace();
+        }
+        return ++last;
     }
 }
