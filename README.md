@@ -21,3 +21,8 @@ The employee timetable system allows employees and managers to punch in when the
 ### Transaction Handling
 
 The transaction handling system allows workers to start transactions after being signed in, add products to a transaction, remove any unwanted ones afterwards, and finally complete the transaction. All previous transactions are then viewable afterwards, with each transaction holding each item that was purchased as well as the employee that completed the transaction. Transactions are immutable.
+
+## Limitations
+
+ - As of right now, only one employee can punch in at a workstation at a time.
+ - To prevent conflicts with transactions logging, removing an item will not remove it from the system, nor will it decrement the SKU list so that previous transactions with said item could retrieve the item's properties when vieweing that transaction.
