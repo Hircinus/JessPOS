@@ -3,21 +3,30 @@ package com.example.jesspos;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Scanner;
 
-public class InventoryLog extends FileHandler {
-    public InventoryLog(File file) {
-        super(file);
+public class TransactionLog extends FileHandler {
+    public TransactionLog(File source) {
+        super(source);
     }
-    public ObservableList<Item> getItems() {
-        ArrayList<Item> output = new ArrayList<>();
+    public ObservableList<Transaction> getTransactions() {
+        ArrayList<Transaction> output = new ArrayList<>();
         try (
                 Scanner scanner = new Scanner(getSource())) {
             while (scanner.hasNext()) {
                 String[] parts = scanner.nextLine().split(",");
-                output.add(new Item(Integer.parseInt(parts[0]),parts[1],Integer.parseInt(parts[2]),Double.parseDouble(parts[3])));
+                String[] itemSKUs = parts[5].split(";");
+                ArrayList<Item> items = new ArrayList<>();
+                for(String SKU : itemSKUs) {
+                    items.add(getInventoryFile().getItem(SKU));
+                }
+                output.add(new Transaction(Integer.parseInt(parts[0]),getEmployeesFile().getEmployee(parts[1]),Instant.parse(parts[2]),items));
             }
         } catch (
                 FileNotFoundException fnfe) {
@@ -25,15 +34,20 @@ public class InventoryLog extends FileHandler {
         }
         return FXCollections.observableArrayList(output);
     }
-    public Item getItem(String SKU) {
+    public Transaction getItem(String ID) {
         try (
                 Scanner scanner = new Scanner(getSource())) {
             while (scanner.hasNext()) {
                 String[] parts = scanner.nextLine().split(",");
-                if(!SKU.equals(parts[0])) {
+                String[] itemSKUs = parts[5].split(";");
+                ArrayList<Item> items = new ArrayList<>();
+                for(String SKU : itemSKUs) {
+                    items.add(getInventoryFile().getItem(SKU));
+                }
+                if(!ID.equals(parts[0])) {
                     continue;
                 } else {
-                    return new Item(Integer.parseInt(parts[0]), parts[1], Integer.parseInt(parts[2]), Double.parseDouble(parts[3]));
+                    return new Transaction(Integer.parseInt(parts[0]),getEmployeesFile().getEmployee(parts[1]),Instant.parse(parts[2]),items);
                 }
             }
         } catch (
@@ -56,15 +70,15 @@ public class InventoryLog extends FileHandler {
         }
         return count;
     }
-    public int getNextSKU() {
+    public int getNextID() {
         int last = 0;
         try (
                 Scanner scanner = new Scanner(getSource())) {
             scanner.useDelimiter("^.+\n$");
-                while (scanner.hasNext()) {
-                    last = Integer.parseInt(scanner.nextLine().split(",")[0]);
-                }
-            } catch (
+            while (scanner.hasNext()) {
+                last = Integer.parseInt(scanner.nextLine().split(",")[0]);
+            }
+        } catch (
                 FileNotFoundException fnfe) {
             fnfe.printStackTrace();
         }
@@ -96,36 +110,20 @@ public class InventoryLog extends FileHandler {
         }
         moveFileTo(getSource(), new File(getSource().getName()+".data"));
     }
-    public void decrementItem(int SKU) {
+    public void addTransaction(Employee employee, ArrayList<Item> items) {
         try (Scanner scanner = new Scanner(getSource());
              PrintWriter writer = new PrintWriter(getSource().getName() + ".data")) {
-            scanner.useDelimiter("^.+\n$");
-            while(scanner.hasNext()) {
-                String currentLine = scanner.nextLine();
-                String[] currentParts = currentLine.split(",");
-                int currentSKU = Integer.parseInt(currentParts[0]);
-                int quant = Integer.parseInt(currentParts[2]);
-                if(currentSKU == SKU) {
-                    if(quant<=1) {
-                        removeItem(SKU);
-                        break;
-                    }
-                    writer.println(currentSKU + "," + currentParts[1] + "," + --quant + "," + currentParts[3]);
-                }
-                else {
-                    writer.println(currentLine);
+            Transaction newTrans = new Transaction(getNextID(), employee, Instant.now(), items);
+            String itemSKUs = "";
+            for(int i = 0; i<items.size(); i++) {
+                getInventoryFile().decrementItem(items.get(i).getSKU());
+                if(i==0) {
+                    itemSKUs += items.get(i).getSKU();
+                } else {
+                    itemSKUs += ";" + items.get(i).getSKU();
                 }
             }
-        } catch (
-                FileNotFoundException fnfe) {
-            fnfe.printStackTrace();
-        }
-        moveFileTo(getSource(), new File(getSource().getName()+".data"));
-    }
-    public void addItem(String name, String quantity, String price) {
-        try (Scanner scanner = new Scanner(getSource());
-                PrintWriter writer = new PrintWriter(getSource().getName() + ".data")) {
-            String input = getNextSKU() + "," + name + "," + quantity + "," + price;
+            String input = newTrans.getID() + "," + newTrans.getEmployee().getName() + "," + newTrans.getDate() + "," + newTrans.getItemsCount() + "," + newTrans.getPriceDelta() + "," + itemSKUs;
             scanner.useDelimiter("^.+\n$");
             while(scanner.hasNext()) {
                 writer.println(scanner.nextLine());
