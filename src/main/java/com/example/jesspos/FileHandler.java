@@ -13,6 +13,7 @@ public class FileHandler {
     private static final EmployeeLog employees = new EmployeeLog(new File("employees"));
     private static final InventoryLog inventory = new InventoryLog(new File("inventory"));
     private static final TransactionLog transactions = new TransactionLog(new File("transactions"));
+    private static final TimeLog times = new TimeLog(new File("times"));
 
     private File source;
     public FileHandler(File source) {
@@ -36,6 +37,9 @@ public class FileHandler {
         return employees;
     }
 
+    public TimeLog getTimesFile() {
+        return times;
+    }
 
     public InventoryLog getInventoryFile() {
         return inventory;

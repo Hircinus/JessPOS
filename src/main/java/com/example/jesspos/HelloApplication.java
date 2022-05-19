@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.kordamp.bootstrapfx.BootstrapFX;
 import org.kordamp.bootstrapfx.scene.layout.Panel;
@@ -28,6 +29,8 @@ public class HelloApplication extends Application {
     public GridPane content = new GridPane();
     public Scene scene = new Scene(content);
     public final FileHandler FH = new FileHandler();
+    public int employeeID = FH.getTimesFile().getSignedInID();
+    public boolean signedIn = (employeeID > 0) ? true : false;
     @Override public void start(Stage stage) throws Exception {
         home(stage);
         scene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
@@ -40,6 +43,44 @@ public class HelloApplication extends Application {
     public void home(Stage stage) {
         sceneClear();
         stage.setTitle("JessPOS - Home");
+        MenuBtn account;
+        if(signedIn) {
+            account = new MenuBtn(("Currently signed in as: " + FH.getEmployeesFile().getEmployee(employeeID).getName() + ". (ID: " + employeeID + ")"), "btn-secondary", "Access your timetable");
+            account.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent actionEvent) {
+                    employee(stage);
+                }
+            });
+        } else {
+            account = new MenuBtn("Currently not signed in.", "", "Sign in");
+            account.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent actionEvent) {
+                    TextInputDialog getEmployeeID = new TextInputDialog("Enter employee ID");
+                    getEmployeeID.setHeaderText("Employee ID is required to punch in");
+                    getEmployeeID.setTitle("Punch in");
+                    getEmployeeID.showAndWait();
+                    if(getEmployeeID.getEditor().getText().isBlank() || getEmployeeID.getEditor().getText() == null) {
+                        UIAlert failure = new UIAlert("Failure", "ID is blank", ButtonType.OK, ButtonType.CLOSE);
+                        failure.showAndWait();
+                        if (failure.getResult() == ButtonType.OK) {
+                            home(stage);
+                        } else {
+                            failure.close();
+                        }
+                    } else {
+                        int ID = Integer.parseInt(getEmployeeID.getEditor().getText());
+                        employeeID = ID;
+                        signedIn = true;
+                        UIAlert success = new UIAlert("Success", "Punched in successfully", ButtonType.OK, ButtonType.CANCEL);
+                        success.showAndWait();
+                        FH.getTimesFile().punchIn(ID);
+                        home(stage);
+                    }
+                }
+            });
+        }
         MenuBtn test1 = new MenuBtn("Inventory", "btn-success", "Access inventory management");
         test1.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -63,28 +104,35 @@ public class HelloApplication extends Application {
             }
         });
         MenuBtn test4 = new MenuBtn("Manage my timetable", "btn-danger", "Manage your timetable and punch in/out");
+        test4.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                employee(stage);
+            }
+        });
         test2.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         test3.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         test4.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         content.setAlignment(Pos.CENTER);
-        content.add(test1, 0, 0);
-        content.add(test2, 1, 0);
-        content.add(test3, 0, 1);
-        content.add(test4, 1, 1);
+        account.setAlignment(Pos.CENTER);
+        account.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        content.add(account, 0, 0, 2, 1);
+        content.add(test1, 0, 1);
+        content.add(test2, 1, 1);
+        content.add(test3, 0, 2);
+        content.add(test4, 1, 2);
         for (int i = 0 ; i < 2 ; i++) {
             ColumnConstraints cc = new ColumnConstraints();
             cc.setPercentWidth(100.0/2.0);
             cc.setHgrow(Priority.ALWAYS);
             content.getColumnConstraints().add(cc);
         }
-        for (int i = 0 ; i < 2 ; i++) {
+        for (int i = 0 ; i < 3 ; i++) {
             RowConstraints rc = new RowConstraints();
-            rc.setPercentHeight(100.0/2.0);
+            rc.setPercentHeight(100.0/3.0);
             rc.setVgrow(Priority.ALWAYS);
             content.getRowConstraints().add(rc);
         }
-        content.setHgap(100);
-        content.setVgap(100);
     }
     public void sceneClear() {
         content.getChildren().clear();
@@ -145,7 +193,7 @@ public class HelloApplication extends Application {
         VBox entryForm = new VBox();
         VBox buttonsHolder = new VBox();
         entryForm.getChildren().addAll(addName,addQuantity,addPrice,addButton);
-        content.add(tbv,0,0);
+        content.add(tbv,0,0, 2, 3);
         MenuBtn back = new MenuBtn("Return [Esc]", "btn-warning", "Return to the homepage");
         back.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -158,8 +206,8 @@ public class HelloApplication extends Application {
         back.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         addButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         buttonsHolder.getChildren().addAll(back, removeButton);
-        content.add(buttonsHolder, 1, 0);
-        content.add(entryForm,0,1);
+        content.add(buttonsHolder, 2, 0, 2, 1);
+        content.add(entryForm,2,1, 1, 1);
     }
     public void transactions(Stage stage)
     {
@@ -200,15 +248,20 @@ public class HelloApplication extends Application {
 
         fullTransaction.getColumns().addAll(SKUCol, nameCol, quantCol, priceCol);
         fullTransaction.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        Text details = new Text();
         tbv.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
+                details.setText("Transaction completed by: " + ((Transaction) newSelection).getEmployee().getName());
                 fullTransaction.setItems(FXCollections.observableArrayList(((Transaction) newSelection).getItems()));
             }
         });
         tbv.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         VBox buttonsHolder = new VBox();
+        VBox transactionDetails = new VBox();
+        transactionDetails.getChildren().add(details);
         content.add(tbv,0,0);
         content.add(fullTransaction, 0, 1);
+        content.add(transactionDetails, 1, 1);
         MenuBtn back = new MenuBtn("Return [Esc]", "btn-warning", "Return to the homepage");
         back.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -271,7 +324,7 @@ public class HelloApplication extends Application {
                 UIAlert endTransAlert = new UIAlert("Finish transaction", "Print current transaction and end?", ButtonType.FINISH, ButtonType.CANCEL);
                 endTransAlert.showAndWait();
                 if (endTransAlert.getResult() == ButtonType.FINISH) {
-                    FH.getTransactionsFile().addTransaction(new Employee("John"), savedItems);
+                    FH.getTransactionsFile().addTransaction(FH.getEmployeesFile().getEmployee(employeeID), savedItems);
                     home(stage);
                 } else {
                     endTransAlert.close();
@@ -315,46 +368,71 @@ public class HelloApplication extends Application {
         tbv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         TableColumn IDCol = new TableColumn("ID");
         IDCol.setCellValueFactory(
-                new PropertyValueFactory<Transaction, Integer>("ID"));
-        TableColumn DateCol = new TableColumn("Date");
-        DateCol.setCellValueFactory(
-                new PropertyValueFactory<Transaction, Instant>("date"));
-        TableColumn ItemsCountCol = new TableColumn("Number of items");
-        ItemsCountCol.setCellValueFactory(
-                new PropertyValueFactory<Transaction, Integer>("itemsCount"));
-        TableColumn PriceDeltaCol = new TableColumn("Total cost");
-        PriceDeltaCol.setCellValueFactory(
-                new PropertyValueFactory<Transaction, Integer>("priceDelta"));
+                new PropertyValueFactory<Employee, Integer>("ID"));
+        TableColumn NameCol = new TableColumn("Name");
+        NameCol.setCellValueFactory(
+                new PropertyValueFactory<Employee, String>("name"));
 
-        tbv.getColumns().addAll(IDCol, DateCol, ItemsCountCol, PriceDeltaCol);
-        tbv.setItems(FH.getTransactionsFile().getTransactions());
+        TextField addName = new TextField();
+        addName.setPromptText("Employee name");
 
-        TableView fullTransaction = new TableView();
-        fullTransaction.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        TableColumn SKUCol = new TableColumn("SKU");
-        SKUCol.setCellValueFactory(
-                new PropertyValueFactory<Item, Integer>("SKU"));
-        TableColumn nameCol = new TableColumn("Name");
-        nameCol.setCellValueFactory(
-                new PropertyValueFactory<Item, String>("name"));
-        TableColumn quantCol = new TableColumn("Quantity");
-        quantCol.setCellValueFactory(
-                new PropertyValueFactory<Item, Integer>("quantity"));
-        TableColumn priceCol = new TableColumn("Price (CAD $)");
-        priceCol.setCellValueFactory(
-                new PropertyValueFactory<Item, Double>("price"));
+        tbv.getColumns().addAll(IDCol, NameCol);
+        tbv.setItems(FH.getEmployeesFile().getEmployees());
 
-        fullTransaction.getColumns().addAll(SKUCol, nameCol, quantCol, priceCol);
-        fullTransaction.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        TableView schedule = new TableView();
+        schedule.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        TableColumn pinCol = new TableColumn("Punch in");
+        pinCol.setCellValueFactory(
+                new PropertyValueFactory<Time, Instant>("pin"));
+        TableColumn poutCol = new TableColumn("Punch out");
+        poutCol.setCellValueFactory(
+                new PropertyValueFactory<Time, Instant>("pout"));
+        TableColumn deltaCol = new TableColumn("Shift length (minutes)");
+        deltaCol.setCellValueFactory(
+                new PropertyValueFactory<Time, Long>("delta"));
+
+        schedule.getColumns().addAll(pinCol, poutCol, deltaCol);
+        schedule.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         tbv.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                fullTransaction.setItems(FXCollections.observableArrayList(((Transaction) newSelection).getItems()));
+                int ID = ((Employee) newSelection).getID();
+                schedule.setItems(FXCollections.observableArrayList((FH.getTimesFile().getTimes(ID))));
+            }
+        });
+        MenuBtn newEmployee = new MenuBtn("Add new employee (admin)", "btn-primary", "Create new employee (admin privileges required)");
+        newEmployee.setDefaultButton(true);
+        newEmployee.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                TextInputDialog verifyAdmin = new TextInputDialog("Enter admin password");
+                verifyAdmin.setHeaderText("Password is required to complete that action");
+                verifyAdmin.setTitle("Admin privileges required");
+                verifyAdmin.showAndWait();
+                if(verifyAdmin.getEditor().getText().equals("p4$$w0rd")) {
+                    UIAlert success = new UIAlert("Success", "Admin priviliges enabled and employee added", ButtonType.OK, ButtonType.CANCEL);
+                    success.showAndWait();
+                    if (success.getResult() == ButtonType.OK) {
+                        FH.getEmployeesFile().addEmployee(addName.getText());
+                        tbv.setItems(FH.getEmployeesFile().getEmployees());
+                    } else {
+                        success.close();
+                    }
+                } else {
+                    UIAlert failure = new UIAlert("Failure", "Password incorrect", ButtonType.OK, ButtonType.CLOSE);
+                    failure.showAndWait();
+                    if (failure.getResult() == ButtonType.OK) {
+                        home(stage);
+                    } else {
+                        failure.close();
+                    }
+                }
             }
         });
         tbv.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         VBox buttonsHolder = new VBox();
+        VBox entryForm = new VBox();
         content.add(tbv,0,0);
-        content.add(fullTransaction, 0, 1);
+        //content.add(schedule, 0, 1);
         MenuBtn back = new MenuBtn("Return [Esc]", "btn-warning", "Return to the homepage");
         back.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -364,8 +442,56 @@ public class HelloApplication extends Application {
         });
         back.setCancelButton(true);
         back.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        buttonsHolder.getChildren().addAll(back);
-        content.add(buttonsHolder, 1, 0);
+        MenuBtn punchIn = new MenuBtn("Punch in", "btn-primary", "Punch in with employee ID");
+        punchIn.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                TextInputDialog getEmployeeID = new TextInputDialog("Enter employee ID");
+                getEmployeeID.setHeaderText("Employee ID is required to punch in");
+                getEmployeeID.setTitle("Punch in");
+                getEmployeeID.showAndWait();
+                if(getEmployeeID.getEditor().getText().isBlank() || getEmployeeID.getEditor().getText() == null) {
+                    UIAlert failure = new UIAlert("Failure", "ID is blank", ButtonType.OK, ButtonType.CLOSE);
+                    failure.showAndWait();
+                    if (failure.getResult() == ButtonType.OK) {
+                        home(stage);
+                    } else {
+                        failure.close();
+                    }
+                } else {
+                    int ID = Integer.parseInt(getEmployeeID.getEditor().getText());
+                    employeeID = ID;
+                    signedIn = true;
+                    UIAlert success = new UIAlert("Success", "Punched in successfully", ButtonType.OK, ButtonType.CANCEL);
+                    success.showAndWait();
+                    FH.getTimesFile().punchIn(ID);
+                    buttonsHolder.getChildren().clear();
+                    home(stage);
+                }
+            }
+        });
+        MenuBtn punchOut = new MenuBtn("Punch out", "btn-secondary", "Punch out from current session");
+        punchOut.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                UIAlert success = new UIAlert("Success", "Punched out successfully", ButtonType.OK, ButtonType.CANCEL);
+                success.showAndWait();
+                FH.getTimesFile().punchOut(employeeID);
+                employeeID = 0;
+                signedIn = false;
+                buttonsHolder.getChildren().clear();
+                home(stage);
+            }
+        });
+        if(signedIn==true) {
+            buttonsHolder.getChildren().addAll(back, punchOut);
+        } else {
+            buttonsHolder.getChildren().addAll(back, punchIn);
+        }
+        entryForm.getChildren().addAll(addName,newEmployee);
+        content.add(entryForm, 0, 1);
+        content.add(schedule, 1, 0);
+        content.add(buttonsHolder, 2, 0);
     }
     private class UIAlert extends Alert {
         public UIAlert(String title, String content, ButtonType bt1, ButtonType bt2) {

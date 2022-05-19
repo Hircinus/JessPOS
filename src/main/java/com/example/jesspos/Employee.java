@@ -1,10 +1,23 @@
 package com.example.jesspos;
 
-public class Employee {
-    private String name;
+import java.util.ArrayList;
 
-    public Employee(String name) {
+public class Employee {
+    private int ID;
+    private String name;
+    private ArrayList<Time> times  = new ArrayList<>();
+
+    public Employee(int ID, String name) {
+        this.ID = ID;
         this.name = name;
+    }
+
+    public int getID() {
+        return ID;
+    }
+
+    public void setID(int ID) {
+        this.ID = ID;
     }
 
     public String getName() {

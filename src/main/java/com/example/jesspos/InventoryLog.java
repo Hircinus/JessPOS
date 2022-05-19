@@ -73,18 +73,13 @@ public class InventoryLog extends FileHandler {
     public void removeItem(int SKU) {
         try (Scanner scanner = new Scanner(getSource());
              PrintWriter writer = new PrintWriter(getSource().getName() + ".data")) {
-            boolean found = false;
             scanner.useDelimiter("^.+\n$");
             while(scanner.hasNext()) {
                 String currentLine = scanner.nextLine();
                 String[] currentParts = currentLine.split(",");
                 int currentSKU = Integer.parseInt(currentParts[0]);
                 if(currentSKU == SKU) {
-                    found = true;
-                    continue;
-                }
-                else if (found) {
-                    writer.println(--currentSKU + "," + currentParts[1] + "," + currentParts[2] + "," + currentParts[3]);
+                    writer.println(currentSKU + "," + currentParts[1] + "," + 0 + "," + currentParts[3]);
                 }
                 else {
                     writer.println(currentLine);
