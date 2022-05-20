@@ -12,6 +12,7 @@ public class Time {
     private String conpin;
     private Instant pout;
     private String conpout;
+    private double pay;
 
     public long getDelta() {
         return delta;
@@ -33,6 +34,7 @@ public class Time {
         this.conpout = ldt.getMonth() + " " + ldt.getDayOfMonth() + " ; " + newHour + ":" + newMinute;
         Duration d = Duration.between(pin, pout);
         this.delta = d.toMinutes();
+        this.pay = Math.round((new FileHandler().getEmployeesFile().getEmployee(ID).getSalary()) * this.delta * 100.00) / 100.00;
     }
 
     public Time() {
@@ -63,6 +65,10 @@ public class Time {
         else
             newHour = "" + ldt.getHour();
         return newHour;
+    }
+
+    public double getPay() {
+        return pay;
     }
 
     public String getConpin() {

@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 public class TestAppObjects {
     @Test
     public void testEmployee() {
-        Employee e1 = new Employee(1, "John");
+        Employee e1 = new Employee(1, "John", 19.99);
         Employee e2 = new Employee();
         e2.setName("Bella");
         assertEquals(e1.getID(), 1);
@@ -49,7 +49,7 @@ public class TestAppObjects {
         items.add(new Item(5, "screws", 44, 3.99));
         items.add(new Item(3, "nails", 34, 5.99));
         Instant now = Instant.now();
-        Employee john = new Employee(1, "John");
+        Employee john = new Employee(1, "John", 19.99);
         Transaction t1 = new Transaction(12, john, now, items);
         Transaction t2 = new Transaction();
         assertEquals(t1.getRawDate(), now);

@@ -389,11 +389,16 @@ public class HelloApplication extends Application {
         addButton.setDefaultButton(true);
         MenuBtn removeButton = new MenuBtn("Remove", "btn-danger", "Remove highlighted row");
         removeButton.setOnAction(actionEvent -> {
-            Item i = (Item) tbv.getSelectionModel().getSelectedItem();
-            savedItems.remove(i);
-            // add 1 to quantity to cancel out adding the item when removing
-            FH.getInventoryFile().incrementItem(i.getSKU());
-            tbv.setItems(FXCollections.observableArrayList(savedItems));
+            if(tbv.getSelectionModel().getSelectedItem() != null) {
+                Item i = (Item) tbv.getSelectionModel().getSelectedItem();
+                savedItems.remove(i);
+                // add 1 to quantity to cancel out adding the item when removing
+                FH.getInventoryFile().incrementItem(i.getSKU());
+                tbv.setItems(FXCollections.observableArrayList(savedItems));
+            } else {
+                UIAlert fail = new UIAlert("Could not remove", "Please select an item to remove", ButtonType.OK, ButtonType.CLOSE);
+                fail.showAndWait();
+            }
         });
         MenuBtn endButton = new MenuBtn("End transaction", "btn-warning", "End transaction");
         endButton.setOnAction(actionEvent -> {
@@ -448,11 +453,16 @@ public class HelloApplication extends Application {
         TableColumn NameCol = new TableColumn("Name");
         NameCol.setCellValueFactory(
                 new PropertyValueFactory<Employee, String>("name"));
+        TableColumn salCol = new TableColumn("Salary (CAD $/hour)");
+        salCol.setCellValueFactory(
+                new PropertyValueFactory<Employee, String>("salary"));
 
         TextField addName = new TextField();
         addName.setPromptText("Employee name");
+        TextField addSalary = new TextField();
+        addSalary.setPromptText("Employee salary (CAD $/hour)");
 
-        tbv.getColumns().addAll(IDCol, NameCol);
+        tbv.getColumns().addAll(IDCol, NameCol, salCol);
         tbv.setItems(FH.getEmployeesFile().getEmployees());
 
         TableView schedule = new TableView();
@@ -466,15 +476,18 @@ public class HelloApplication extends Application {
         TableColumn deltaCol = new TableColumn("Shift length (minutes)");
         deltaCol.setCellValueFactory(
                 new PropertyValueFactory<Time, Long>("delta"));
+        TableColumn payCol = new TableColumn("Pay for shift");
+        payCol.setCellValueFactory(
+                new PropertyValueFactory<Time, Double>("pay"));
 
-        schedule.getColumns().addAll(pinCol, poutCol, deltaCol);
+        schedule.getColumns().addAll(pinCol, poutCol, deltaCol, payCol);
         tbv.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 int ID = ((Employee) newSelection).getID();
                 schedule.setItems(FXCollections.observableArrayList((FH.getTimesFile().getTimes(ID))));
             }
         });
-        MenuBtn newEmployee = new MenuBtn("Add new employee (admin)", "btn-primary", "Create new employee (admin privileges required)");
+        MenuBtn newEmployee = new MenuBtn("Add new employee [enter] (admin)", "btn-primary", "Create new employee (admin privileges required)");
         newEmployee.setDefaultButton(true);
         newEmployee.setOnAction(actionEvent -> {
             // Verify name is not already taken
@@ -490,12 +503,13 @@ public class HelloApplication extends Application {
             verifyAdmin.setHeaderText("Password is required to complete that action");
             verifyAdmin.setTitle("Admin privileges required");
             verifyAdmin.showAndWait();
-            if(verifyAdmin.getEditor().getText().equals("p4$$w0rd")) {
+            if(verifyAdmin.getEditor().getText().equals("p4$$w0rd") && addSalary.getText().matches("^[0-9]+.[0-9]{2}$")) {
                 UIAlert success = new UIAlert("Success", "Admin privileges enabled and employee added", ButtonType.OK, ButtonType.CANCEL);
                 success.showAndWait();
-                FH.getEmployeesFile().addEmployee(addName.getText());
+                FH.getEmployeesFile().addEmployee(addName.getText(), Double.parseDouble(addSalary.getText()));
                 tbv.setItems(FH.getEmployeesFile().getEmployees());
                 addName.clear();
+                addSalary.clear();
             } else {
                 UIAlert failure = new UIAlert("Failure", "Password incorrect", ButtonType.OK, ButtonType.CLOSE);
                 failure.showAndWait();
@@ -504,6 +518,40 @@ public class HelloApplication extends Application {
                 } else {
                     failure.close();
                 }
+            }
+        });
+        MenuBtn editEmployee = new MenuBtn("Edit selected employee (admin)", "btn-success", "Edit selected employee (admin privileges required)");
+        editEmployee.setOnAction(actionEvent -> {
+            if(tbv.getSelectionModel().getSelectedItem() != null) {
+                TextInputDialog verifyAdmin = new TextInputDialog("Enter admin password");
+                verifyAdmin.setHeaderText("Password is required to complete that action");
+                verifyAdmin.setTitle("Admin privileges required");
+                verifyAdmin.showAndWait();
+                if(verifyAdmin.getEditor().getText().equals("p4$$w0rd")) {
+                    if(addSalary.getText().matches("^[0-9]+.[0-9]{2}$")) {
+                        UIAlert success = new UIAlert("Success", "Admin privileges enabled and employee " + addName.getText() + " edited successfully", ButtonType.OK, ButtonType.CANCEL);
+                        success.showAndWait();
+                        FH.getEmployeesFile().setEmployee(addName.getText(), Double.parseDouble(addSalary.getText()));
+                        tbv.setItems(FH.getEmployeesFile().getEmployees());
+                        schedule.setItems(FXCollections.observableArrayList((FH.getTimesFile().getTimes(FH.getEmployeesFile().getEmployee(addName.getText()).getID()))));
+                        addName.clear();
+                        addSalary.clear();
+                    } else {
+                        UIAlert failure = new UIAlert("Failure", "Salary invalid; please ensure salary is a double with two decimals", ButtonType.OK, ButtonType.CLOSE);
+                        failure.showAndWait();
+                    }
+                } else {
+                    UIAlert failure = new UIAlert("Failure", "Password incorrect", ButtonType.OK, ButtonType.CLOSE);
+                    failure.showAndWait();
+                    if (failure.getResult() == ButtonType.OK) {
+                        home(stage);
+                    } else {
+                        failure.close();
+                    }
+                }
+            } else {
+                UIAlert fail = new UIAlert("Could not edit", "Please select an employee to edit", ButtonType.OK, ButtonType.CLOSE);
+                fail.showAndWait();
             }
         });
         VBox buttonsHolder = new VBox();
@@ -529,7 +577,7 @@ public class HelloApplication extends Application {
         } else {
             buttonsHolder.getChildren().addAll(back, punchIn);
         }
-        entryForm.getChildren().addAll(addName,newEmployee);
+        entryForm.getChildren().addAll(addName,addSalary,newEmployee, editEmployee);
         content.add(entryForm, 1, 1);
         content.add(schedule, 0, 1);
         content.add(buttonsHolder, 1, 0);
