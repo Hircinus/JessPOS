@@ -20,7 +20,7 @@ public class TimeLog extends FileHandler {
         ArrayList<Time> output = new ArrayList<>();
         for(String[] parts : scanSrc()) {
             int currentID = Integer.parseInt(parts[0]);
-            if(currentID==ID) {
+            if(currentID==ID && !parts[1].equals(parts[2])) {
                 output.add(new Time(ID, Instant.parse(parts[1]),Instant.parse(parts[2])));
             }
         }

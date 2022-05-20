@@ -11,6 +11,15 @@ public class InventoryLog extends FileHandler {
     public InventoryLog(File file) {
         super(file);
     }
+    public ObservableList<Item> getFilteredItems() {
+        ArrayList<Item> output = new ArrayList<>();
+        for(String[] parts : scanSrc()) {
+            if(Integer.parseInt(parts[2]) > 0) {
+                output.add(new Item(Integer.parseInt(parts[0]),parts[1],Integer.parseInt(parts[2]),Double.parseDouble(parts[3])));
+            }
+        }
+        return FXCollections.observableArrayList(output);
+    }
     public ObservableList<Item> getItems() {
         ArrayList<Item> output = new ArrayList<>();
         for(String[] parts : scanSrc()) {

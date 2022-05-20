@@ -35,6 +35,19 @@ public class Time {
         this.delta = d.toMinutes();
     }
 
+    public Time() {
+        this.ID = 0;
+        Instant now = Instant.now();
+        this.pin = now;
+        this.pout = now;
+        LocalDateTime ldt = LocalDateTime.ofInstant(pin, ZoneId.systemDefault());
+        this.conpin = ldt.getMonth() + " " + (ldt.getDayOfMonth() + 00) + " ; " + generateNewHour(ldt) + ":" + generateNewMinute(ldt);
+        ldt = LocalDateTime.ofInstant(pout, ZoneId.systemDefault());
+        this.conpout = ldt.getMonth() + " " + (ldt.getDayOfMonth() + 00) + " ; " + generateNewHour(ldt) + ":" + generateNewMinute(ldt);
+        Duration d = Duration.between(pin, pout);
+        this.delta = d.toMinutes();
+    }
+
     public static String generateNewMinute(LocalDateTime ldt) {
         String newMinute;
         if ((ldt.getMinute() + "").matches("^[0-9]$"))
@@ -62,13 +75,5 @@ public class Time {
 
     public int getID() {
         return ID;
-    }
-
-    public Instant getPin() {
-        return pin;
-    }
-
-    public Instant getPout() {
-        return pout;
     }
 }

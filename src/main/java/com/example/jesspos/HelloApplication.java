@@ -140,7 +140,7 @@ public class HelloApplication extends Application {
     {
         sceneClear();
         stage.setTitle("JessPOS - Inventory Management");
-        TableView tbv = new TableView(FH.getInventoryFile().getItems());
+        TableView tbv = new TableView(FH.getInventoryFile().getFilteredItems());
         tbv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         TableColumn SKUCol = new TableColumn("SKU");
         SKUCol.setCellValueFactory(
@@ -168,12 +168,22 @@ public class HelloApplication extends Application {
             if(addName.getText().matches("^[A-Za-z\s]+$")
                     && addQuantity.getText().matches("^[0-9]+$")
                     && addPrice.getText().matches("^[0-9]+.[0-9]{2}$")) {
-                FH.getInventoryFile().addItem(addName.getText(), addQuantity.getText(), addPrice.getText());
-                addName.clear();
-                addQuantity.clear();
-                addPrice.clear();
-                tbv.setItems(FH.getInventoryFile().getItems());
-                addName.requestFocus();
+
+                if(Integer.parseInt(addQuantity.getText()) > 0 && Double.parseDouble(addPrice.getText()) > 0) {
+                    FH.getInventoryFile().addItem(addName.getText(), addQuantity.getText(), addPrice.getText());
+                    addName.clear();
+                    addQuantity.clear();
+                    addPrice.clear();
+                    tbv.setItems(FH.getInventoryFile().getFilteredItems());
+                    addName.requestFocus();
+                } else {
+                    UIAlert invalidEntries = new UIAlert("Invalid product properties", "Some or all of your inputs are blank or invalid.\nDon't forget that product names should contain only letters or spaces, quantity only integers, and price only doubles (number with 2 decimals).", ButtonType.OK, ButtonType.CLOSE);
+                    invalidEntries.showAndWait();
+                    addName.clear();
+                    addQuantity.clear();
+                    addPrice.clear();
+                    addName.requestFocus();
+                }
             } else {
                 UIAlert invalidEntries = new UIAlert("Invalid product properties", "Some or all of your inputs are blank or invalid.\nDon't forget that product names should contain only letters or spaces, quantity only integers, and price only doubles (number with 2 decimals).", ButtonType.OK, ButtonType.CLOSE);
                 invalidEntries.showAndWait();
@@ -188,7 +198,7 @@ public class HelloApplication extends Application {
         removeButton.setOnAction(actionEvent -> {
             Item item = (Item) tbv.getSelectionModel().getSelectedItem();
             FH.getInventoryFile().removeItem(item.getSKU());
-            tbv.setItems(FH.getInventoryFile().getItems());
+            tbv.setItems(FH.getInventoryFile().getFilteredItems());
         });
         VBox entryForm = new VBox();
         VBox buttonsHolder = new VBox();
