@@ -16,11 +16,11 @@ The inventory management system allows users to create new items with a name, qu
 
 ### Employee Timetable System
 
-The employee timetable system allows employees and managers to punch in when they come to their workstation, punch out at the end of their shift, and view their previous shifts as well as the durations of each shift. This helps managers ensure payroll is accurate to when employees showed up, and allows employees to ensure that all the time they are at work is accounted for. Managers can also create new employee accounts using an administrator password with a name and an automatically created ID.
+The employee timetable system allows employees and managers to punch in when they come to their workstation, punch out at the end of their shift, and view their previous shifts as well as the durations of each shift. This helps managers ensure payroll is accurate to when employees showed up, and allows employees to ensure that all the time they are at work is accounted for. Managers can also create new employee accounts using an administrator password with a name and a hardcoded password ID.
 
 ### Transaction Handling
 
-The transaction handling system allows workers to start transactions after being signed in, add products to a transaction, remove any unwanted ones afterwards, and finally complete the transaction. All previous transactions are then viewable afterwards, with each transaction holding each item that was purchased as well as the employee that completed the transaction. Transactions are immutable.
+The transaction handling system allows workers to start transactions after being signed in, add products to a transaction, remove any unwanted ones afterwards, and finally complete the transaction. All previous transactions are then viewable afterwards, with each transaction holding each item that was purchased as well as the employee that completed the transaction. Transactions are immutable after completion.
 
 ## Limitations
 
