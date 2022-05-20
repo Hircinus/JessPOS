@@ -123,4 +123,22 @@ public class InventoryLog extends FileHandler {
         }
         moveFileTo(getSource(), new File(getSource().getName()+".data"));
     }
+    public void setItem(int SKU, String name, String quantity, String price) {
+        try (Scanner scanner = new Scanner(getSource());
+             PrintWriter writer = new PrintWriter(getSource().getName() + ".data")) {
+            String input = SKU + "," + name + "," + quantity + "," + price;
+            scanner.useDelimiter("^.+\n$");
+            while(scanner.hasNext()) {
+                String next = scanner.nextLine();
+                if(next.split(",")[0].equals(SKU + ""))
+                    writer.println(input);
+                else
+                    writer.println(next);
+            }
+        } catch (
+                FileNotFoundException fnfe) {
+            fnfe.printStackTrace();
+        }
+        moveFileTo(getSource(), new File(getSource().getName()+".data"));
+    }
 }

@@ -28,6 +28,13 @@ public class EmployeeLog extends FileHandler {
         }
         return null;
     }
+    public boolean employeeExists(int ID) {
+        for(String[] parts : scanSrc()) {
+            if(ID==Integer.parseInt(parts[0]))
+                return true;
+        }
+        return false;
+    }
     public ObservableList<Employee> getEmployees() {
         ArrayList<Employee> output = new ArrayList<>();
         for(String[] parts : scanSrc()) {

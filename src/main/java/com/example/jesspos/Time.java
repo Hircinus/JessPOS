@@ -26,11 +26,11 @@ public class Time {
         LocalDateTime ldt = LocalDateTime.ofInstant(pin, ZoneId.systemDefault());
         String newMinute = generateNewMinute(ldt);
         String newHour = generateNewHour(ldt);
-        this.conpin = ldt.getMonth() + " " + (ldt.getDayOfMonth() + 00) + " ; " + newHour + ":" + newMinute;
+        this.conpin = ldt.getMonth() + " " + ldt.getDayOfMonth() + " ; " + newHour + ":" + newMinute;
         ldt = LocalDateTime.ofInstant(pout, ZoneId.systemDefault());
         newMinute = generateNewMinute(ldt);
         newHour = generateNewHour(ldt);
-        this.conpout = ldt.getMonth() + " " + (ldt.getDayOfMonth() + 00) + " ; " + newHour + ":" + newMinute;
+        this.conpout = ldt.getMonth() + " " + ldt.getDayOfMonth() + " ; " + newHour + ":" + newMinute;
         Duration d = Duration.between(pin, pout);
         this.delta = d.toMinutes();
     }
@@ -41,9 +41,9 @@ public class Time {
         this.pin = now;
         this.pout = now;
         LocalDateTime ldt = LocalDateTime.ofInstant(pin, ZoneId.systemDefault());
-        this.conpin = ldt.getMonth() + " " + (ldt.getDayOfMonth() + 00) + " ; " + generateNewHour(ldt) + ":" + generateNewMinute(ldt);
+        this.conpin = ldt.getMonth() + " " + ldt.getDayOfMonth() + " ; " + generateNewHour(ldt) + ":" + generateNewMinute(ldt);
         ldt = LocalDateTime.ofInstant(pout, ZoneId.systemDefault());
-        this.conpout = ldt.getMonth() + " " + (ldt.getDayOfMonth() + 00) + " ; " + generateNewHour(ldt) + ":" + generateNewMinute(ldt);
+        this.conpout = ldt.getMonth() + " " + ldt.getDayOfMonth() + " ; " + generateNewHour(ldt) + ":" + generateNewMinute(ldt);
         Duration d = Duration.between(pin, pout);
         this.delta = d.toMinutes();
     }

@@ -73,7 +73,7 @@ public class TimeLog extends FileHandler {
         }
         return output;
     }
-    public String getLastTime(int ID) throws TimeNotFoundException {
+    public String getLastTime(int ID){
         for(String[] parts : scanSrc()) {
             int currentID = Integer.parseInt(parts[0]);
             if(currentID==ID&&parts[1].equals(parts[2])) {
@@ -81,11 +81,6 @@ public class TimeLog extends FileHandler {
                 return currentTime.getConpin();
             }
         }
-        throw new TimeNotFoundException(ID);
-    }
-    public static class TimeNotFoundException extends Exception {
-        public TimeNotFoundException(int ID) {
-            super("Time entry not found for user with ID: " + ID);
-        }
+        return "";
     }
 }

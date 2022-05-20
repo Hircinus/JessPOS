@@ -28,12 +28,14 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class HelloApplication extends Application {
+    // initialize global variables
     public GridPane content = new GridPane();
     public Scene scene = new Scene(content);
     public final FileHandler FH = new FileHandler();
     public int employeeID = FH.getTimesFile().getSignedInID();
     public boolean signedIn = employeeID > 0;
     @Override public void start(Stage stage) {
+        // open homepage
         home(stage);
         scene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         stage.setScene(scene);
@@ -45,16 +47,16 @@ public class HelloApplication extends Application {
     public void home(Stage stage) {
         sceneClear();
         stage.setTitle("JessPOS - Home");
-        MenuBtn account = null;
+        // Create top button that displays if the user is signed in on the homepage
+        // and since what date and time
+        MenuBtn account;
         if(signedIn) {
-            try {
-                account = new MenuBtn(("Currently signed in as: " + FH.getEmployeesFile().getEmployee(employeeID).getName() + ". (ID: " + employeeID + ")" +
-                        "\nSince: " + FH.getTimesFile().getLastTime(employeeID)), "btn-secondary", "Access your timetable");
-            } catch (TimeLog.TimeNotFoundException e) {
-                e.printStackTrace();
-            }
+            account = new MenuBtn(("Currently signed in as: " + FH.getEmployeesFile().getEmployee(employeeID).getName() + ". (ID: " + employeeID + ")" +
+                    "\nSince: " + FH.getTimesFile().getLastTime(employeeID)), "btn-secondary", "Access your timetable");
+            // If signed in, make the button go to the employee management view
             account.setOnAction(actionEvent -> employee(stage));
         } else {
+            // if not signed in, prompt the user to sign in
             account = new MenuBtn("Currently not signed in.", "", "Sign in");
             account.setOnAction(actionEvent -> signIn(stage));
         }
@@ -65,6 +67,7 @@ public class HelloApplication extends Application {
             if(signedIn) {
                 transaction(stage);
             } else {
+                // prompt sign-in to open transaction view if not already
                 if(signIn(stage)) {
                     transaction(stage);
                 }
@@ -76,7 +79,6 @@ public class HelloApplication extends Application {
         employeesBtn.setOnAction(actionEvent -> employee(stage));
         content.setAlignment(Pos.CENTER);
         account.setAlignment(Pos.CENTER);
-
         content.add(account, 0, 0, 2, 1);
         content.addRow(1, inventoryBtn, transactionBtn);
         content.addRow(2, viewTransactionsBtn, employeesBtn);
@@ -88,6 +90,7 @@ public class HelloApplication extends Application {
         getEmployeeID.setTitle("Punch in");
         getEmployeeID.showAndWait();
         String input = getEmployeeID.getEditor().getText();
+        // check if input contains a non-number
         if(input.matches("^[^0-9]+$")) {
             UIAlert failure = new UIAlert("Failure", "ID is blank or invalid, please try again.", ButtonType.OK, ButtonType.CLOSE);
             failure.showAndWait();
@@ -96,17 +99,28 @@ public class HelloApplication extends Application {
             } else {
                 failure.close();
             }
-            return false;
         } else {
             int ID = Integer.parseInt(getEmployeeID.getEditor().getText());
-            employeeID = ID;
-            signedIn = true;
-            UIAlert success = new UIAlert("Success", "Punched in successfully", ButtonType.OK, ButtonType.CANCEL);
-            success.showAndWait();
-            FH.getTimesFile().punchIn(ID);
-            home(stage);
-            return true;
+            // check if valid ID matches an Employee
+            if(FH.getEmployeesFile().employeeExists(ID)) {
+                employeeID = ID;
+                signedIn = true;
+                UIAlert success = new UIAlert("Success", "Punched in successfully", ButtonType.OK, ButtonType.CANCEL);
+                success.showAndWait();
+                FH.getTimesFile().punchIn(ID);
+                home(stage);
+                return true;
+            } else {
+                UIAlert failure = new UIAlert("Failure", "ID does not match a user, please try again.", ButtonType.OK, ButtonType.CLOSE);
+                failure.showAndWait();
+                if (failure.getResult() == ButtonType.OK) {
+                    home(stage);
+                } else {
+                    failure.close();
+                }
+            }
         }
+        return false;
     }
     public void sceneClear() {
         content.getChildren().clear();
@@ -114,6 +128,7 @@ public class HelloApplication extends Application {
         content.getRowConstraints().clear();
     }
     public void sceneInit(int x, int y) {
+        // initialize scene with `x` columns and `y` rows
         content.setAlignment(Pos.CENTER);
         for (int i = 0 ; i < x ; i++) {
             ColumnConstraints cc = new ColumnConstraints();
@@ -165,11 +180,15 @@ public class HelloApplication extends Application {
 
         MenuBtn addButton = new MenuBtn("Add [Enter]", "btn-primary", "Add new product with above details");
         addButton.setOnAction(e -> {
+            // Check input strings for correct patterns:
+            // Name: only alphabetical and space characters
+            // Quantity: only non-zero, positive integers
+            // Price: only positive doubles (can be zero)
             if(addName.getText().matches("^[A-Za-z\s]+$")
                     && addQuantity.getText().matches("^[0-9]+$")
                     && addPrice.getText().matches("^[0-9]+.[0-9]{2}$")) {
 
-                if(Integer.parseInt(addQuantity.getText()) > 0 && Double.parseDouble(addPrice.getText()) > 0) {
+                if(Integer.parseInt(addQuantity.getText()) > 0 && Double.parseDouble(addPrice.getText()) >= 0) {
                     FH.getInventoryFile().addItem(addName.getText(), addQuantity.getText(), addPrice.getText());
                     addName.clear();
                     addQuantity.clear();
@@ -196,18 +215,67 @@ public class HelloApplication extends Application {
         addButton.setDefaultButton(true);
         MenuBtn removeButton = new MenuBtn("Remove", "btn-danger", "Remove highlighted row");
         removeButton.setOnAction(actionEvent -> {
-            Item item = (Item) tbv.getSelectionModel().getSelectedItem();
-            FH.getInventoryFile().removeItem(item.getSKU());
+            if(tbv.getSelectionModel().getSelectedItem() != null) {
+                Item item = (Item) tbv.getSelectionModel().getSelectedItem();
+                FH.getInventoryFile().removeItem(item.getSKU());
+                tbv.setItems(FH.getInventoryFile().getFilteredItems());
+            } else {
+                UIAlert fail = new UIAlert("Cannot remove item", "Please select an item to remove", ButtonType.OK, ButtonType.CLOSE);
+                fail.showAndWait();
+            }
+        });
+        MenuBtn viewAllItems = new MenuBtn("View all items", "btn-secondary", "View all including removed items (listed as having quantity of 0)");
+        viewAllItems.setOnAction(actionEvent -> {
+            tbv.setItems(FH.getInventoryFile().getItems());
+        });
+        MenuBtn viewButton = new MenuBtn("View non-removed items", "btn-secondary", "View non-removed items (listed as having quantity greater than 0)");
+        viewButton.setOnAction(actionEvent -> {
             tbv.setItems(FH.getInventoryFile().getFilteredItems());
+        });
+        MenuBtn editButton = new MenuBtn("Edit", "btn-success", "Edit highlighted row");
+        editButton.setOnAction(actionEvent -> {
+            if(tbv.getSelectionModel().getSelectedItem() != null) {
+                Item newSelection = (Item) tbv.getSelectionModel().getSelectedItem();
+                if(addName.getText().matches("^[A-Za-z\s]+$")
+                        && addQuantity.getText().matches("^[0-9]+$")
+                        && addPrice.getText().matches("^[0-9]+.[0-9]{2}$")) {
+
+                    if(Integer.parseInt(addQuantity.getText()) > 0 && Double.parseDouble(addPrice.getText()) >= 0) {
+                        FH.getInventoryFile().setItem(newSelection.getSKU(), addName.getText(), addQuantity.getText(), addPrice.getText());
+                        addName.clear();
+                        addQuantity.clear();
+                        addPrice.clear();
+                        tbv.setItems(FH.getInventoryFile().getFilteredItems());
+                        addName.requestFocus();
+                    } else {
+                        UIAlert invalidEntries = new UIAlert("Invalid product properties", "Some or all of your inputs are blank or invalid.\nDon't forget that product names should contain only letters or spaces, quantity only integers, and price only doubles (number with 2 decimals).", ButtonType.OK, ButtonType.CLOSE);
+                        invalidEntries.showAndWait();
+                        addName.clear();
+                        addQuantity.clear();
+                        addPrice.clear();
+                        addName.requestFocus();
+                    }
+                } else {
+                    UIAlert invalidEntries = new UIAlert("Invalid product properties", "Some or all of your inputs are blank or invalid.\nDon't forget that product names should contain only letters or spaces, quantity only integers, and price only doubles (number with 2 decimals).", ButtonType.OK, ButtonType.CLOSE);
+                    invalidEntries.showAndWait();
+                    addName.clear();
+                    addQuantity.clear();
+                    addPrice.clear();
+                    addName.requestFocus();
+                }
+            } else {
+                UIAlert fail = new UIAlert("Cannot edit item", "Please select an item to edit", ButtonType.OK, ButtonType.CLOSE);
+                fail.showAndWait();
+            }
         });
         VBox entryForm = new VBox();
         VBox buttonsHolder = new VBox();
-        entryForm.getChildren().addAll(addName,addQuantity,addPrice,addButton);
+        entryForm.getChildren().addAll(addName,addQuantity,addPrice,addButton, editButton);
         content.add(tbv,0,0, 2, 2);
         MenuBtn back = new MenuBtn("Return [Esc]", "btn-warning", "Return to the homepage");
         back.setOnAction(actionEvent -> home(stage));
         back.setCancelButton(true);
-        buttonsHolder.getChildren().addAll(back, removeButton);
+        buttonsHolder.getChildren().addAll(back, removeButton, viewAllItems, viewButton);
         content.add(buttonsHolder, 2, 0, 1, 1);
         content.add(entryForm,2,1, 1, 1);
         content.getStyleClass().add("bg-success");
@@ -297,7 +365,9 @@ public class HelloApplication extends Application {
         MenuBtn addButton = new MenuBtn("Add [Enter]", "btn-primary", "Add product with SKU to transaction");
         addButton.setOnAction(e -> {
             try {
+                // check SKU input pattern: must be integer
                 if(addSKU.getText().matches("^[0-9]+$")) {
+                    // remove 1 from quantity of added SKU so that it displays the updated quantity in the tableview
                     FH.getInventoryFile().decrementItem(Integer.parseInt(addSKU.getText()));
                     savedItems.add(FH.getInventoryFile().getItem(addSKU.getText()));
                 }
@@ -305,10 +375,11 @@ public class HelloApplication extends Application {
                     UIAlert SKUInvalid = new UIAlert("Invalid SKU", "Sorry, that's not a valid SKU.\nSKUs should consist of only numerical digits.", ButtonType.OK, ButtonType.CLOSE);
                     SKUInvalid.showAndWait();
                 }
+                // if item not found, show error
+                // (maybe find a way to provide view of inventory in transaction for easier adding?)
             } catch (InventoryLog.ItemNotFoundException ex) {
                 UIAlert itemNotFound = new UIAlert("Item not found", "Sorry, no item with that SKU could be found.", ButtonType.OK, ButtonType.CLOSE);
                 itemNotFound.showAndWait();
-                return;
             }
             addSKU.clear();
             tbv.setItems(FXCollections.observableArrayList(savedItems));
@@ -319,6 +390,7 @@ public class HelloApplication extends Application {
         removeButton.setOnAction(actionEvent -> {
             Item i = (Item) tbv.getSelectionModel().getSelectedItem();
             savedItems.remove(i);
+            // add 1 to quantity to cancel out adding the item when removing
             FH.getInventoryFile().incrementItem(i.getSKU());
             tbv.setItems(FXCollections.observableArrayList(savedItems));
         });
@@ -342,6 +414,8 @@ public class HelloApplication extends Application {
             if(savedItems.size() > 0) {
                 UIAlert pendingTransAlert = new UIAlert("Unfinished transaction", "Quit current transaction? (All data will be lost)", ButtonType.OK, ButtonType.CANCEL);
                 pendingTransAlert.showAndWait();
+                // on unfinished transaction, send user to home view if they press ok;
+                // otherwise, close dialog and remain in transaction view
                 if (pendingTransAlert.getResult() == ButtonType.OK) {
                     for(Item i : savedItems) {
                         FH.getInventoryFile().incrementItem(i.getSKU());
