@@ -13,12 +13,15 @@ public class Item {
         this.price = price;
     }
 
-    public int getSKU() {
-        return SKU;
+    public Item() {
+        this.SKU = 0;
+        this.name = "";
+        this.quantity = 0;
+        this.price = 0.00;
     }
 
-    public void setSKU(int SKU) {
-        this.SKU = SKU;
+    public int getSKU() {
+        return SKU;
     }
 
     public String getName() {
@@ -33,15 +36,7 @@ public class Item {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
     public double getPrice() {
         return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
     }
 }

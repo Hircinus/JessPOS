@@ -17,10 +17,6 @@ public class Time {
         return delta;
     }
 
-    public void setDelta(long delta) {
-        this.delta = delta;
-    }
-
     private long delta;
 
     public Time(int ID, Instant pin, Instant pout) {
@@ -40,16 +36,16 @@ public class Time {
     }
 
     public static String generateNewMinute(LocalDateTime ldt) {
-        String newMinute = "";
-        if ((ldt.getMinute() + "").matches("^[0-9]{1}$"))
+        String newMinute;
+        if ((ldt.getMinute() + "").matches("^[0-9]$"))
             newMinute = ldt.getMinute() + "0";
         else
             newMinute = "" + ldt.getMinute();
         return newMinute;
     }
     public static String generateNewHour(LocalDateTime ldt) {
-        String newHour = "";
-        if ((ldt.getHour() + "").matches("^[0-9]{1}$"))
+        String newHour;
+        if ((ldt.getHour() + "").matches("^[0-9]$"))
             newHour = "0" + ldt.getHour();
         else
             newHour = "" + ldt.getHour();
@@ -60,39 +56,19 @@ public class Time {
         return conpin;
     }
 
-    public void setConpin(String conpin) {
-        this.conpin = conpin;
-    }
-
     public String getConpout() {
         return conpout;
-    }
-
-    public void setConpout(String conpout) {
-        this.conpout = conpout;
     }
 
     public int getID() {
         return ID;
     }
 
-    public void setID(int ID) {
-        this.ID = ID;
-    }
-
     public Instant getPin() {
         return pin;
     }
 
-    public void setPin(Instant pin) {
-        this.pin = pin;
-    }
-
     public Instant getPout() {
         return pout;
-    }
-
-    public void setPout(Instant pout) {
-        this.pout = pout;
     }
 }

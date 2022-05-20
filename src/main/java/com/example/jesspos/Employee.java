@@ -9,12 +9,13 @@ public class Employee {
         this.name = name;
     }
 
-    public int getID() {
-        return ID;
+    public Employee() {
+        this.ID = 0;
+        this.name = "";
     }
 
-    public void setID(int ID) {
-        this.ID = ID;
+    public int getID() {
+        return ID;
     }
 
     public String getName() {

@@ -83,7 +83,7 @@ public class TimeLog extends FileHandler {
         }
         throw new TimeNotFoundException(ID);
     }
-    public class TimeNotFoundException extends Exception {
+    public static class TimeNotFoundException extends Exception {
         public TimeNotFoundException(int ID) {
             super("Time entry not found for user with ID: " + ID);
         }

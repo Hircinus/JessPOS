@@ -31,57 +31,41 @@ public class Transaction {
         this.priceDelta = Math.round(priceDelta * 100.0) / 100.0;
     }
 
-    public Instant getRawDate() {
-        return rawDate;
+    public Transaction() {
+        this.ID = 0;
+        this.employee = new Employee();
+        this.rawDate = Instant.now();
+        Time transTime = new Time(employee.getID(), rawDate, rawDate);
+        this.date = transTime.getConpin();
+        this.items = new ArrayList<Item>();
+        this.itemsCount = items.size();
+        itemSKUs = new ArrayList<Integer>();
+        priceDelta = 0.00;
     }
 
-    public void setRawDate(Instant rawDate) {
-        this.rawDate = rawDate;
+    public Instant getRawDate() {
+        return rawDate;
     }
 
     public int getID() {
         return ID;
     }
 
-    public void setID(int ID) {
-        this.ID = ID;
-    }
-
     public int getItemsCount() {
         return itemsCount;
-    }
-
-    public void setItemsCount(int itemsCount) {
-        this.itemsCount = itemsCount;
     }
 
     public double getPriceDelta() {
         return priceDelta;
     }
 
-    public void setPriceDelta(double priceDelta) {
-        this.priceDelta = priceDelta;
-    }
-
     public Employee getEmployee() {
         return employee;
     }
 
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
-    }
-
     public String getDate() { return date; }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
 
     public ArrayList<Item> getItems() {
         return items;
-    }
-
-    public void setItems(ArrayList<Item> items) {
-        this.items = items;
     }
 }
