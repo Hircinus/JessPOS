@@ -2,6 +2,7 @@ package com.example.jesspos;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
@@ -476,6 +477,15 @@ public class HelloApplication extends Application {
         MenuBtn newEmployee = new MenuBtn("Add new employee (admin)", "btn-primary", "Create new employee (admin privileges required)");
         newEmployee.setDefaultButton(true);
         newEmployee.setOnAction(actionEvent -> {
+            // Verify name is not already taken
+            ObservableList<Employee> employees = FH.getEmployeesFile().getEmployees();
+            for(Employee e : employees) {
+                if(e.getName().equalsIgnoreCase(addName.getText())) {
+                    UIAlert failure = new UIAlert("Failure", "Name already taken; please choose another name.", ButtonType.OK, ButtonType.CLOSE);
+                    failure.showAndWait();
+                    return;
+                }
+            }
             TextInputDialog verifyAdmin = new TextInputDialog("Enter admin password");
             verifyAdmin.setHeaderText("Password is required to complete that action");
             verifyAdmin.setTitle("Admin privileges required");
