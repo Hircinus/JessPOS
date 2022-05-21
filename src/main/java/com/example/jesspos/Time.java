@@ -34,7 +34,7 @@ public class Time {
         this.conpout = ldt.getMonth() + " " + ldt.getDayOfMonth() + " ; " + newHour + ":" + newMinute;
         Duration d = Duration.between(pin, pout);
         this.delta = d.toMinutes();
-        this.pay = Math.round((new FileHandler().getEmployeesFile().getEmployee(ID).getSalary()) * this.delta * 100.00) / 100.00;
+        this.pay = Math.round((new FileHandler().getEmployeesFile().getEmployee(ID).getSalary()) * this.delta * 100.00) / 6000.00;
     }
 
     public Time() {

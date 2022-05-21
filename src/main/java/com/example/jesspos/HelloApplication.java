@@ -93,7 +93,7 @@ public class HelloApplication extends Application {
         String input = getEmployeeID.getEditor().getText();
         // check if input contains a non-number
         if(input.matches("^[^0-9]+$")) {
-            UIAlert failure = new UIAlert("Failure", "ID is blank or invalid, please try again.", ButtonType.OK, ButtonType.CLOSE);
+            UIAlert failure = new UIAlert("Error", "ID is blank or invalid, please try again.\nRemember: ID must be an integer.", ButtonType.OK, ButtonType.CLOSE);
             failure.showAndWait();
             if (failure.getResult() == ButtonType.OK) {
                 home(stage);
@@ -112,7 +112,7 @@ public class HelloApplication extends Application {
                 home(stage);
                 return true;
             } else {
-                UIAlert failure = new UIAlert("Failure", "ID does not match a user, please try again.", ButtonType.OK, ButtonType.CLOSE);
+                UIAlert failure = new UIAlert("Error", "ID does not match a user, please try again.", ButtonType.OK, ButtonType.CLOSE);
                 failure.showAndWait();
                 if (failure.getResult() == ButtonType.OK) {
                     home(stage);
@@ -172,12 +172,16 @@ public class HelloApplication extends Application {
                 new PropertyValueFactory<Item, Double>("price"));
 
         tbv.getColumns().addAll(SKUCol, nameCol, quantCol, priceCol);
+        ArrayList<TextField> fields = new ArrayList<TextField>();
         TextField addName = new TextField("Product name");
         addName.setMinHeight(50);
         TextField addQuantity = new TextField("Quantity in stock");
         addQuantity.setMinHeight(50);
         TextField addPrice = new TextField("Price (CAD $)");
         addPrice.setMinHeight(50);
+        fields.add(addName);
+        fields.add(addQuantity);
+        fields.add(addPrice);
 
         MenuBtn addButton = new MenuBtn("Add [Enter]", "btn-primary", "Add new product with above details");
         addButton.setOnAction(e -> {
@@ -191,30 +195,27 @@ public class HelloApplication extends Application {
 
                 if(Integer.parseInt(addQuantity.getText()) > 0 && Double.parseDouble(addPrice.getText()) >= 0) {
                     FH.getInventoryFile().addItem(addName.getText(), addQuantity.getText(), addPrice.getText());
-                    addName.clear();
-                    addQuantity.clear();
-                    addPrice.clear();
+                    for(TextField f : fields)
+                        f.clear();
                     tbv.setItems(FH.getInventoryFile().getFilteredItems());
                     addName.requestFocus();
                 } else {
                     UIAlert invalidEntries = new UIAlert("Invalid product properties", "Some or all of your inputs are blank or invalid.\nDon't forget that product names should contain only letters or spaces, quantity only integers, and price only doubles (number with 2 decimals).", ButtonType.OK, ButtonType.CLOSE);
                     invalidEntries.showAndWait();
-                    addName.clear();
-                    addQuantity.clear();
-                    addPrice.clear();
+                    for(TextField f : fields)
+                        f.clear();
                     addName.requestFocus();
                 }
             } else {
                 UIAlert invalidEntries = new UIAlert("Invalid product properties", "Some or all of your inputs are blank or invalid.\nDon't forget that product names should contain only letters or spaces, quantity only integers, and price only doubles (number with 2 decimals).", ButtonType.OK, ButtonType.CLOSE);
                 invalidEntries.showAndWait();
-                addName.clear();
-                addQuantity.clear();
-                addPrice.clear();
+                for(TextField f : fields)
+                    f.clear();
                 addName.requestFocus();
             }
         });
         addButton.setDefaultButton(true);
-        MenuBtn removeButton = new MenuBtn("Remove", "btn-danger", "Remove highlighted row");
+        MenuBtn removeButton = new MenuBtn("Remove", "btn-danger", "Remove highlighted item");
         removeButton.setOnAction(actionEvent -> {
             if(tbv.getSelectionModel().getSelectedItem() != null) {
                 Item item = (Item) tbv.getSelectionModel().getSelectedItem();
@@ -233,7 +234,7 @@ public class HelloApplication extends Application {
         viewButton.setOnAction(actionEvent -> {
             tbv.setItems(FH.getInventoryFile().getFilteredItems());
         });
-        MenuBtn editButton = new MenuBtn("Edit", "btn-success", "Edit highlighted row");
+        MenuBtn editButton = new MenuBtn("Edit", "btn-success", "Edit highlighted item");
         editButton.setOnAction(actionEvent -> {
             if(tbv.getSelectionModel().getSelectedItem() != null) {
                 Item newSelection = (Item) tbv.getSelectionModel().getSelectedItem();
@@ -243,25 +244,22 @@ public class HelloApplication extends Application {
 
                     if(Integer.parseInt(addQuantity.getText()) > 0 && Double.parseDouble(addPrice.getText()) >= 0) {
                         FH.getInventoryFile().setItem(newSelection.getSKU(), addName.getText(), addQuantity.getText(), addPrice.getText());
-                        addName.clear();
-                        addQuantity.clear();
-                        addPrice.clear();
+                        for(TextField f : fields)
+                            f.clear();
                         tbv.setItems(FH.getInventoryFile().getFilteredItems());
                         addName.requestFocus();
                     } else {
                         UIAlert invalidEntries = new UIAlert("Invalid product properties", "Some or all of your inputs are blank or invalid.\nDon't forget that product names should contain only letters or spaces, quantity only integers, and price only doubles (number with 2 decimals).", ButtonType.OK, ButtonType.CLOSE);
                         invalidEntries.showAndWait();
-                        addName.clear();
-                        addQuantity.clear();
-                        addPrice.clear();
+                        for(TextField f : fields)
+                            f.clear();
                         addName.requestFocus();
                     }
                 } else {
                     UIAlert invalidEntries = new UIAlert("Invalid product properties", "Some or all of your inputs are blank or invalid.\nDon't forget that product names should contain only letters or spaces, quantity only integers, and price only doubles (number with 2 decimals).", ButtonType.OK, ButtonType.CLOSE);
                     invalidEntries.showAndWait();
-                    addName.clear();
-                    addQuantity.clear();
-                    addPrice.clear();
+                    for(TextField f : fields)
+                        f.clear();
                     addName.requestFocus();
                 }
             } else {
@@ -360,6 +358,7 @@ public class HelloApplication extends Application {
                 new PropertyValueFactory<Item, Double>("price"));
 
         tbv.getColumns().addAll(SKUCol, nameCol, quantCol, priceCol);
+
         TextField addSKU = new TextField("Product SKU");
         addSKU.setMinHeight(50);
         ArrayList<Item> savedItems = new ArrayList<>();
@@ -373,7 +372,7 @@ public class HelloApplication extends Application {
                     savedItems.add(FH.getInventoryFile().getItem(addSKU.getText()));
                 }
                 else {
-                    UIAlert SKUInvalid = new UIAlert("Invalid SKU", "Sorry, that's not a valid SKU.\nSKUs should consist of only numerical digits.", ButtonType.OK, ButtonType.CLOSE);
+                    UIAlert SKUInvalid = new UIAlert("Invalid SKU", "Sorry, that's not a valid SKU.\nSKUs should be an integer.", ButtonType.OK, ButtonType.CLOSE);
                     SKUInvalid.showAndWait();
                 }
                 // if item not found, show error
@@ -402,13 +401,18 @@ public class HelloApplication extends Application {
         });
         MenuBtn endButton = new MenuBtn("End transaction", "btn-warning", "End transaction");
         endButton.setOnAction(actionEvent -> {
-            UIAlert endTransAlert = new UIAlert("Finish transaction", "Print current transaction and end?", ButtonType.FINISH, ButtonType.CANCEL);
-            endTransAlert.showAndWait();
-            if (endTransAlert.getResult() == ButtonType.FINISH) {
-                FH.getTransactionsFile().addTransaction(FH.getEmployeesFile().getEmployee(employeeID), savedItems);
-                home(stage);
+            if(savedItems.size() > 0) {
+                UIAlert endTransAlert = new UIAlert("Finish transaction", "Print current transaction and end?", ButtonType.FINISH, ButtonType.CANCEL);
+                endTransAlert.showAndWait();
+                if (endTransAlert.getResult() == ButtonType.FINISH) {
+                    FH.getTransactionsFile().addTransaction(FH.getEmployeesFile().getEmployee(employeeID), savedItems);
+                    home(stage);
+                } else {
+                    endTransAlert.close();
+                }
             } else {
-                endTransAlert.close();
+                UIAlert emptyTrans = new UIAlert("Empty transaction", "Please add at least one item to the transaction.", ButtonType.OK, ButtonType.CANCEL);
+                emptyTrans.showAndWait();
             }
         });
         VBox entryForm = new VBox();
@@ -485,9 +489,11 @@ public class HelloApplication extends Application {
             if (newSelection != null) {
                 int ID = ((Employee) newSelection).getID();
                 schedule.setItems(FXCollections.observableArrayList((FH.getTimesFile().getTimes(ID))));
+            } else {
+                schedule.setItems(FXCollections.observableArrayList(new ArrayList<Item>()));
             }
         });
-        MenuBtn newEmployee = new MenuBtn("Add new employee [enter] (admin)", "btn-primary", "Create new employee (admin privileges required)");
+        MenuBtn newEmployee = new MenuBtn("Add new employee [Enter] (admin)", "btn-primary", "Create new employee with above properties (admin privileges required)");
         newEmployee.setDefaultButton(true);
         newEmployee.setOnAction(actionEvent -> {
             // Verify name is not already taken
@@ -503,13 +509,21 @@ public class HelloApplication extends Application {
             verifyAdmin.setHeaderText("Password is required to complete that action");
             verifyAdmin.setTitle("Admin privileges required");
             verifyAdmin.showAndWait();
-            if(verifyAdmin.getEditor().getText().equals("p4$$w0rd") && addSalary.getText().matches("^[0-9]+.[0-9]{2}$")) {
-                UIAlert success = new UIAlert("Success", "Admin privileges enabled and employee added", ButtonType.OK, ButtonType.CANCEL);
-                success.showAndWait();
-                FH.getEmployeesFile().addEmployee(addName.getText(), Double.parseDouble(addSalary.getText()));
-                tbv.setItems(FH.getEmployeesFile().getEmployees());
-                addName.clear();
-                addSalary.clear();
+            // Check password against hash stored in "shadow"
+            if(FH.passIsCorrect(verifyAdmin.getEditor().getText())) {
+                // Check that salary is number with 2 decimal places
+                if(addSalary.getText().matches("^[0-9]+.[0-9]{2}$")) {
+                    UIAlert success = new UIAlert("Success", "Admin privileges enabled and employee added", ButtonType.OK, ButtonType.CANCEL);
+                    success.showAndWait();
+                    // Add employee to file
+                    FH.getEmployeesFile().addEmployee(addName.getText(), Double.parseDouble(addSalary.getText()));
+                    tbv.setItems(FH.getEmployeesFile().getEmployees());
+                    addName.clear();
+                    addSalary.clear();
+                } else {
+                    UIAlert failure = new UIAlert("Failure", "Salary invalid; please ensure salary is a double with two decimals", ButtonType.OK, ButtonType.CLOSE);
+                    failure.showAndWait();
+                }
             } else {
                 UIAlert failure = new UIAlert("Failure", "Password incorrect", ButtonType.OK, ButtonType.CLOSE);
                 failure.showAndWait();
@@ -520,17 +534,20 @@ public class HelloApplication extends Application {
                 }
             }
         });
-        MenuBtn editEmployee = new MenuBtn("Edit selected employee (admin)", "btn-success", "Edit selected employee (admin privileges required)");
+        MenuBtn editEmployee = new MenuBtn("Edit selected employee (admin)", "btn-success", "Edit selected employee with above properties (admin privileges required)");
         editEmployee.setOnAction(actionEvent -> {
             if(tbv.getSelectionModel().getSelectedItem() != null) {
                 TextInputDialog verifyAdmin = new TextInputDialog("Enter admin password");
                 verifyAdmin.setHeaderText("Password is required to complete that action");
                 verifyAdmin.setTitle("Admin privileges required");
                 verifyAdmin.showAndWait();
-                if(verifyAdmin.getEditor().getText().equals("p4$$w0rd")) {
+                // Check password against hash stored in "shadow"
+                if(FH.passIsCorrect(verifyAdmin.getEditor().getText())) {
+                    // Check that salary is number with 2 decimal places
                     if(addSalary.getText().matches("^[0-9]+.[0-9]{2}$")) {
                         UIAlert success = new UIAlert("Success", "Admin privileges enabled and employee " + addName.getText() + " edited successfully", ButtonType.OK, ButtonType.CANCEL);
                         success.showAndWait();
+                        // Set new properties to file
                         FH.getEmployeesFile().setEmployee(addName.getText(), Double.parseDouble(addSalary.getText()));
                         tbv.setItems(FH.getEmployeesFile().getEmployees());
                         schedule.setItems(FXCollections.observableArrayList((FH.getTimesFile().getTimes(FH.getEmployeesFile().getEmployee(addName.getText()).getID()))));
@@ -552,6 +569,35 @@ public class HelloApplication extends Application {
             } else {
                 UIAlert fail = new UIAlert("Could not edit", "Please select an employee to edit", ButtonType.OK, ButtonType.CLOSE);
                 fail.showAndWait();
+            }
+        });
+        MenuBtn editPassword = new MenuBtn("Edit admin password (admin)", "btn-secondary", "Edit the administrative password (admin privileges required)");
+        editPassword.setOnAction(actionEvent -> {
+            TextInputDialog verifyAdmin = new TextInputDialog("Enter admin password");
+            verifyAdmin.setHeaderText("Password is required to complete that action");
+            verifyAdmin.setTitle("Admin privileges required");
+            verifyAdmin.showAndWait();
+            // Check password against hash stored in "shadow"
+            if(FH.passIsCorrect(verifyAdmin.getEditor().getText())) {
+                TextInputDialog newPass = new TextInputDialog("Enter new admin password");
+                newPass.setHeaderText("New admin password");
+                newPass.setTitle("New admin password");
+                newPass.showAndWait();
+                // Make sure new password is at least 8 non-whitespace characters
+                if(!newPass.getEditor().getText().matches("^[\s]{8}$")) {
+                    FH.setPassword(newPass.getEditor().getText());
+                } else {
+                    UIAlert failure = new UIAlert("Failure", "Password invalid: please ensure the password has no whitespace and is at least 8 characters long", ButtonType.OK, ButtonType.CLOSE);
+                    failure.showAndWait();
+                }
+            } else {
+                UIAlert failure = new UIAlert("Failure", "Password incorrect", ButtonType.OK, ButtonType.CLOSE);
+                failure.showAndWait();
+                if (failure.getResult() == ButtonType.OK) {
+                    home(stage);
+                } else {
+                    failure.close();
+                }
             }
         });
         VBox buttonsHolder = new VBox();
@@ -577,6 +623,7 @@ public class HelloApplication extends Application {
         } else {
             buttonsHolder.getChildren().addAll(back, punchIn);
         }
+        buttonsHolder.getChildren().add(editPassword);
         entryForm.getChildren().addAll(addName,addSalary,newEmployee, editEmployee);
         content.add(entryForm, 1, 1);
         content.add(schedule, 0, 1);

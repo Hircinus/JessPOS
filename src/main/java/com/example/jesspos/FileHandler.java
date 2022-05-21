@@ -16,6 +16,34 @@ public class FileHandler {
     private static final InventoryLog inventory = new InventoryLog(new File("inventory"));
     private static final TransactionLog transactions = new TransactionLog(new File("transactions"));
     private static final TimeLog times = new TimeLog(new File("times"));
+    private static final File shadow = new File("shadow");
+
+    public FileHandler() {
+        if(!shadow.isFile())
+            setPassword("p4$$w0rd");
+    }
+
+    public void setPassword(String pass) {
+        try (PrintWriter writer = new PrintWriter(shadow)) {
+            writer.println(pass.hashCode());
+        } catch (
+                FileNotFoundException fnfe) {
+            fnfe.printStackTrace();
+        }
+    }
+    public boolean passIsCorrect(String pass) {
+        try (Scanner scanner = new Scanner(shadow)) {
+            while(scanner.hasNext()) {
+                if(pass.hashCode() == Integer.parseInt(scanner.nextLine())) {
+                    return true;
+                }
+            }
+        } catch (
+                FileNotFoundException fnfe) {
+            fnfe.printStackTrace();
+        }
+        return false;
+    }
 
     private File source;
     public FileHandler(File source) {
@@ -28,8 +56,6 @@ public class FileHandler {
         }
         this.source = source;
     }
-
-    public FileHandler() {}
 
     public File getSource() {
         return source;
