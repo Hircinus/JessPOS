@@ -12,11 +12,11 @@ In the future, I hope to extend JessPOS to have a more sophisticated logging and
 
 ### Inventory Management
 
-The inventory management system allows users to create new items with a name, quantity in stock, and price (and an automatically created SKU number). They can view previously created items, remove a selected item, or sort through the list to find what they're looking for faster. The quantities of items adjusts automatically when they are added to completed transactions.
+The inventory management system allows users to create new items with a name, quantity in stock, and price (and an automatically created SKU number). They can view previously created items, remove a selected item, edit a selected item or sort through the list to find what they're looking for faster. The quantities of items adjusts automatically when they are added to completed transactions.
 
 ### Employee Timetable System
 
-The employee timetable system allows employees and managers to punch in when they come to their workstation, punch out at the end of their shift, and view their previous shifts as well as the durations of each shift. This helps managers ensure payroll is accurate to when employees showed up, and allows employees to ensure that all the time they are at work is accounted for. Managers can also create new employee accounts using an administrator password with a name and a hardcoded password ID.
+The employee timetable system allows employees and managers to punch in when they come to their workstation, punch out at the end of their shift, and view their previous shifts as well as the durations of each shift, while also keeping track of the salary of each employee and displaying their pay per shift stored. This helps managers ensure payroll is accurate to when employees showed up, and allows employees to ensure that all the time they are at work is accounted for. Managers can also create new employee accounts using an administrator password with a name and a hardcoded password ID.
 
 ### Transaction Handling
 
