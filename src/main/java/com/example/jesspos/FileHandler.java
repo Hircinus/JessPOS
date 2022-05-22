@@ -92,14 +92,6 @@ public class FileHandler {
         return output;
     }
 
-    public int getItemsCount() {
-        int count = 0;
-        for(String[] parts : scanSrc()) {
-            count++;
-        }
-        return count;
-    }
-
     public void moveFileTo(File file1, File file2) {
         try (Scanner scanner = new Scanner(file2);
              PrintWriter writer = new PrintWriter(file1)) {

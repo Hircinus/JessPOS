@@ -1,6 +1,6 @@
 package com.example.jesspos;
 
-public class Employee {
+public class Employee implements Identifiable {
     private int ID;
     private String name;
     private double salary;
@@ -24,6 +24,8 @@ public class Employee {
     public int getID() {
         return ID;
     }
+
+    public void setID(int ID) { this.ID=ID; }
 
     public String getName() {
         return name;

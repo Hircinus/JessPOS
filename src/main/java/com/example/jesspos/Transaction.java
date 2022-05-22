@@ -1,12 +1,9 @@
 package com.example.jesspos;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 
-public class Transaction {
+public class Transaction implements Identifiable {
     private int ID;
     private Employee employee;
     private Instant rawDate;
@@ -14,7 +11,6 @@ public class Transaction {
     private int itemsCount;
     private ArrayList<Item> items;
     private double priceDelta;
-    private ArrayList<Integer> itemSKUs = new ArrayList<>();
 
     public Transaction(int ID, Employee employee, Instant date, ArrayList<Item> items) {
         this.ID = ID;
@@ -24,10 +20,6 @@ public class Transaction {
         this.date = transTime.getConpin();
         this.items = items;
         this.itemsCount = items.size();
-        for(Item i : items) {
-            this.priceDelta += i.getPrice();
-            this.itemSKUs.add(i.getSKU());
-        }
         this.priceDelta = Math.round(priceDelta * 100.0) / 100.0;
     }
 
@@ -39,7 +31,6 @@ public class Transaction {
         this.date = transTime.getConpin();
         this.items = new ArrayList<Item>();
         this.itemsCount = items.size();
-        itemSKUs = new ArrayList<Integer>();
         priceDelta = 0.00;
     }
 
@@ -50,6 +41,8 @@ public class Transaction {
     public int getID() {
         return ID;
     }
+
+    public void setID(int ID) { this.ID=ID; }
 
     public int getItemsCount() {
         return itemsCount;
@@ -62,8 +55,6 @@ public class Transaction {
     public Employee getEmployee() {
         return employee;
     }
-
-    public String getDate() { return date; }
 
     public ArrayList<Item> getItems() {
         return items;

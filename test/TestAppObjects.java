@@ -1,5 +1,6 @@
 import com.example.jesspos.*;
 import javafx.collections.ObservableList;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -20,39 +21,43 @@ public class TestAppObjects {
         e2.setName("Bella");
         assertEquals(e1.getID(), 1);
         assertEquals(e1.getName(), "John");
-        assertEquals(e1.getSalary(), 19.99);
+        assertEquals(e1.getSalary(), 19.99, 0.01);
         assertEquals(e2.getID(), 0);
         assertEquals(e2.getName(), "Bella");
-        assertEquals(e2.getSalary(), 0.00);
+        assertEquals(e2.getSalary(), 0.00, 0.01);
     }
     @Test
     public void testItem() {
         Item i1 = new Item(12, "hammer", 7, 99.99);
         Item i2 = new Item();
         i2.setName("screwdriver");
-        assertEquals(i1.getSKU(), 12);
+        assertEquals(i1.getID(), 12);
         assertEquals(i1.getName(), "hammer");
         assertEquals(i1.getQuantity(), 7);
         assertEquals(i1.getPrice(), 99.99, 0.01);
-        assertEquals(i2.getSKU(), 0);
+        assertEquals(i2.getID(), 0);
         assertEquals(i2.getName(), "screwdriver");
         assertEquals(i2.getQuantity(), 0);
         assertEquals(i2.getPrice(), 0.00, 0.01);
     }
 
     public void testItem(Item i, int SKU, String name, int quant, double price) {
-        assertEquals(i.getSKU(), SKU);
+        assertEquals(i.getID(), SKU);
         assertEquals(i.getName(), name);
         assertEquals(i.getQuantity(), quant);
         assertEquals(i.getPrice(), price, 0.01);
     }
+    /*
+    // Cannot reliably test `Transaction` since it is dependent on `Time` which has a hardcoded link to the main "employees" file
     @Test
     public void testTransaction() {
         ArrayList<Item> items = new ArrayList<>();
         items.add(new Item(5, "screws", 44, 3.99));
         items.add(new Item(3, "nails", 34, 5.99));
         Instant now = Instant.now();
+        EmployeeLog EL = new EmployeeLog(new File("testemployees"));
         Employee john = new Employee(1, "John", 19.99);
+        EL.addEmployee(john.getName(), john.getSalary());
         Transaction t1 = new Transaction(12, john, now, items);
         Transaction t2 = new Transaction();
         assertEquals(t1.getRawDate(), now);
@@ -69,6 +74,7 @@ public class TestAppObjects {
         // `getEmployee()` of empty transaction cannot be reliably verified since the Employee instantiated inside the object
         // assertEquals(t2.getEmployee(), t2.getEmployee());
         assertEquals(t2.getItems(), new ArrayList<Item>());
+        EL.getSource().delete();
     }
 
     @Test
@@ -80,13 +86,14 @@ public class TestAppObjects {
         Time t2 = new Time();
         assertEquals(t1.getID(), 2);
         assertEquals(t1.getConpin(), ldt.getMonth() + " " + ldt.getDayOfMonth() + " ; " + t1.generateNewHour(ldt) + ":" + t1.generateNewMinute(ldt));
-        assertEquals(t1.getDelta(), (Duration.between(now, now)));
+        assertEquals(t1.getDelta(), (Duration.between(now, now)).toMinutes());
         assertEquals(t1.getPay(), (e1.getSalary() * t1.getDelta()), 0.01);
         assertEquals(t2.getID(), 0);
         assertEquals(t2.getConpin(), ldt.getMonth() + " " + ldt.getDayOfMonth() + " ; " + t2.generateNewHour(ldt) + ":" + t2.generateNewMinute(ldt));
         // `t2.getDelta()` and `t2.getPay()` cannot be reliably tested since the Instant objects and Employee objects are initialized in the class
     }
 
+     */
     @Test
     public void testFileHandler() {
         FileHandler FH = new FileHandler();
@@ -98,6 +105,10 @@ public class TestAppObjects {
             } else {
                 System.out.println("File already exists.");
             }
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+        }
+        try {
             if (f2.createNewFile()) {
                 System.out.println("File created: " + f2.getName());
             } else {
@@ -105,9 +116,12 @@ public class TestAppObjects {
             }
         } catch (IOException e) {
             System.out.println("An error occurred.");
-            e.printStackTrace();
         }
         FH.moveFileTo(f1, f2);
+        // Cannot reliably check "passIsCorrect(String)" since it requires knowing the admin password that is unreachable due to being hashed in the "shadow" file
+        // assertTrue(FH.passIsCorrect("p4$$w0rd"));
+        FH.setPassword("poggers1234");
+        assertTrue(FH.passIsCorrect("poggers1234"));
         assertTrue(f1.exists());
         assertFalse(f2.exists());
         assertEquals(FH.getInventoryFile().getSource().getName(), "inventory");
@@ -139,6 +153,28 @@ public class TestAppObjects {
         testItem(filteredItems.get(0), 1, "hammer", 13, 45.99);
         testItem(filteredItems.get(1), 2, "screwdriver", 4, 26.99);
         inventory.getSource().delete();
+    }
+    /*
+    @Test
+    public void testTransactionLog() {
+        TransactionLog transactions = new TransactionLog(new File("testtransactions"));
+        Employee e1 = new Employee(2, "John", 19.00);
+        Employee e2 = new Employee(5, "Jess", 24.00);
+        ArrayList<Item> items = new ArrayList<>();
+        ArrayList<Transaction> transList = new ArrayList<>();
+        items.add(new Item(2, "hammer", 12, 40.99));
+        items.add(new Item(3, "screwdriver", 7, 24.99));
+        transactions.addTransaction(e1, items);
+        Transaction t1 = new Transaction(1, e1, transactions.getTransactions().get(0).getRawDate(), items);
+        items.clear();
+        items.add(new Item(5, "bucket", 15, 12.99));
+        items.add(new Item(6, "table", 2, 144.99));
+        transactions.addTransaction(e2, items);
+        Transaction t2 = new Transaction(2, e2, transactions.getTransactions().get(1).getRawDate(), items);
+        transList.add(t1);
+        transList.add(t2);
+        assertEquals(transList, transactions.getTransactions());
+        transactions.getSource().delete();
     }
     /*
     @Test
