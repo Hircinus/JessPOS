@@ -8,7 +8,13 @@ In the future, I hope to extend JessPOS to have a more sophisticated logging and
 
  - [Features](#features)
  - [Screenshots](#screenshots)
+   - [Home page](#home-page)
+   - [New transaction page](#new-transaction-page)
+   - [Transactions history page](#transactions-history-page)
+   - [Employees and timetables page page](#employees-and-timetables-page)
  - [Design](#design)
+   - [Overview](#overview)
+   - [UML Diagram](#uml-diagram)
  - [Known limitations](#known-limitations)
 
 ## Features
