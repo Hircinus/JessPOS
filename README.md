@@ -1,4 +1,8 @@
 # JessPOS
+![Last commit badge](https://img.shields.io/github/last-commit/Hircinus/JessPOS)
+![Alerts](https://img.shields.io/lgtm/alerts/github/Hircinus/JessPOS)
+![Code quality](https://img.shields.io/lgtm/grade/java/github/Hircinus/JessPOS)
+![License](https://img.shields.io/github/license/Hircinus/JessPOS)
 
 JessPOS is a simple and efficient POS system built in Java with BootstrapFX-assisted UI. In short, it allows for simple inventory and employee management for small- to medium-sized businesses and handles transactions integrated with those two systems. Using Java makes for fairly straightforward development that can be easily deployed to any system that a business might already be using.
 
