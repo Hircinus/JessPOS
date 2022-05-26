@@ -4,13 +4,17 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.kordamp.bootstrapfx.BootstrapFX;
@@ -83,6 +87,7 @@ public class HelloApplication extends Application {
         content.addRow(2, viewTransactionsBtn, employeesBtn);
         sceneInit(2, 3);
     }
+    // Give prompt to user to sign in
     public boolean signIn(Stage stage) {
         TextInputDialog getEmployeeID = new TextInputDialog("", "Employee ID is required to punch in", "Punch in");
         String input = getEmployeeID.getEditor().getText();
@@ -126,6 +131,7 @@ public class HelloApplication extends Application {
             ColumnConstraints cc = new ColumnConstraints();
             cc.setPercentWidth(100.0/x);
             cc.setHgrow(Priority.ALWAYS);
+            cc.setHalignment(HPos.CENTER);
             content.getColumnConstraints().add(cc);
         }
         for (int i = 0 ; i < y; i++) {
@@ -151,7 +157,7 @@ public class HelloApplication extends Application {
         tbv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         TableColumn SKUCol = new TableColumn("SKU");
         SKUCol.setCellValueFactory(
-                new PropertyValueFactory<Item, Integer>("SKU"));
+                new PropertyValueFactory<Item, Integer>("ID"));
         TableColumn nameCol = new TableColumn("Name");
         nameCol.setCellValueFactory(
                 new PropertyValueFactory<Item, String>("name"));
@@ -286,7 +292,7 @@ public class HelloApplication extends Application {
         fullTransaction.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         TableColumn SKUCol = new TableColumn("SKU");
         SKUCol.setCellValueFactory(
-                new PropertyValueFactory<Item, Integer>("SKU"));
+                new PropertyValueFactory<Item, Integer>("ID"));
         TableColumn nameCol = new TableColumn("Name");
         nameCol.setCellValueFactory(
                 new PropertyValueFactory<Item, String>("name"));
@@ -303,12 +309,14 @@ public class HelloApplication extends Application {
         details.setAlignment(Pos.CENTER);
         tbv.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                details.setText("Transaction completed by: " + ((Transaction) newSelection).getEmployee().getName());
+                Employee e = ((Transaction) newSelection).getEmployee();
+                details.setText("Transaction completed by: " + e.getName() + " (ID: " + e.getID() + ")");
                 fullTransaction.setItems(FXCollections.observableArrayList(((Transaction) newSelection).getItems()));
             }
         });
         VBox buttonsHolder = new VBox();
         VBox transactionSingleView = new VBox();
+        transactionSingleView.setAlignment(Pos.CENTER);
         transactionSingleView.getChildren().addAll(details, fullTransaction);
         content.add(tbv,0,0);
         content.add(transactionSingleView, 0, 1);
@@ -327,7 +335,7 @@ public class HelloApplication extends Application {
         tbv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         TableColumn SKUCol = new TableColumn("SKU");
         SKUCol.setCellValueFactory(
-                new PropertyValueFactory<Item, Integer>("SKU"));
+                new PropertyValueFactory<Item, Integer>("ID"));
         TableColumn nameCol = new TableColumn("Name");
         nameCol.setCellValueFactory(
                 new PropertyValueFactory<Item, String>("name"));
@@ -347,9 +355,14 @@ public class HelloApplication extends Application {
             try {
                 // check SKU input pattern: must be integer
                 if(addSKU.getText().matches("^[0-9]+$")) {
-                    // remove 1 from quantity of added SKU so that it displays the updated quantity in the tableview
-                    FH.getInventoryFile().decrementItem(Integer.parseInt(addSKU.getText()));
-                    savedItems.add(FH.getInventoryFile().getItem(addSKU.getText()));
+                    Item newItem = FH.getInventoryFile().getItem(addSKU.getText());
+                    if(newItem.getQuantity()==0) {
+                        UIAlert SKUInvalid = new UIAlert("Invalid SKU", "Sorry, no item with that SKU could be found. (Item has no more quantity to add)", ButtonType.OK, ButtonType.CLOSE);
+                    } else {
+                        // remove 1 from quantity of added SKU so that it displays the updated quantity in the tableview
+                        FH.getInventoryFile().decrementItem(newItem.getID());
+                        savedItems.add(FH.getInventoryFile().getItem(addSKU.getText()));
+                    }
                 }
                 else {
                     UIAlert SKUInvalid = new UIAlert("Invalid SKU", "Sorry, that's not a valid SKU.\nSKUs should be an integer.", ButtonType.OK, ButtonType.CLOSE);
@@ -394,6 +407,7 @@ public class HelloApplication extends Application {
         VBox buttonsHolder = new VBox();
         entryForm.getChildren().addAll(addSKU,addButton);
         content.add(tbv,0,0, 1, 2);
+        // custom back button, does not use BackBtn class
         MenuBtn back = new MenuBtn("Return [Esc]", "btn-warning", "Return to the homepage");
         back.setOnAction(actionEvent -> {
             if(savedItems.size() > 0) {

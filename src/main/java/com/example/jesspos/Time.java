@@ -1,3 +1,5 @@
+// Stores Time objects used in TimeLog
+// Depends on EmployeeLog
 package com.example.jesspos;
 
 import java.time.Duration;
@@ -80,6 +82,6 @@ public class Time implements Identifiable {
     public int getID() {
         return ID;
     }
-    
+
     public void setID(int ID) { this.ID=ID; }
 }

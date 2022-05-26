@@ -48,51 +48,12 @@ public class TestAppObjects {
         assertEquals(i.getPrice(), price, 0.01);
     }
     /*
-    // Cannot reliably test `Transaction` since it is dependent on `Time` which has a hardcoded link to the main "employees" file
+    // Cannot reliably test `Transaction` since it is dependent on `Time` which has a hardcoded link to the main "employees" file when calculating the "pay" field
     @Test
-    public void testTransaction() {
-        ArrayList<Item> items = new ArrayList<>();
-        items.add(new Item(5, "screws", 44, 3.99));
-        items.add(new Item(3, "nails", 34, 5.99));
-        Instant now = Instant.now();
-        EmployeeLog EL = new EmployeeLog(new File("testemployees"));
-        Employee john = new Employee(1, "John", 19.99);
-        EL.addEmployee(john.getName(), john.getSalary());
-        Transaction t1 = new Transaction(12, john, now, items);
-        Transaction t2 = new Transaction();
-        assertEquals(t1.getRawDate(), now);
-        assertEquals(t1.getID(), 12);
-        assertEquals(t1.getItemsCount(), 2);
-        assertEquals(t1.getPriceDelta(), (items.get(0).getPrice()+items.get(1).getPrice()), 0.01);
-        assertEquals(t1.getEmployee(), john);
-        assertEquals(t1.getItems(), items);
-        // `getRawDate()` of empty transaction cannot be reliably verified since the Instant instantiated inside the object
-        // assertEquals(t2.getRawDate(), t2.getRawDate());
-        assertEquals(t2.getID(), 0);
-        assertEquals(t2.getItemsCount(), 0);
-        assertEquals(t2.getPriceDelta(), 0.00, 0.01);
-        // `getEmployee()` of empty transaction cannot be reliably verified since the Employee instantiated inside the object
-        // assertEquals(t2.getEmployee(), t2.getEmployee());
-        assertEquals(t2.getItems(), new ArrayList<Item>());
-        EL.getSource().delete();
-    }
+    public void testTransaction() {}
 
     @Test
-    public void testTime() {
-        Instant now = Instant.now();
-        LocalDateTime ldt = LocalDateTime.ofInstant(now, ZoneId.systemDefault());
-        Time t1 = new Time(2, now, now);
-        Employee e1 = new FileHandler().getEmployeesFile().getEmployee(2);
-        Time t2 = new Time();
-        assertEquals(t1.getID(), 2);
-        assertEquals(t1.getConpin(), ldt.getMonth() + " " + ldt.getDayOfMonth() + " ; " + t1.generateNewHour(ldt) + ":" + t1.generateNewMinute(ldt));
-        assertEquals(t1.getDelta(), (Duration.between(now, now)).toMinutes());
-        assertEquals(t1.getPay(), (e1.getSalary() * t1.getDelta()), 0.01);
-        assertEquals(t2.getID(), 0);
-        assertEquals(t2.getConpin(), ldt.getMonth() + " " + ldt.getDayOfMonth() + " ; " + t2.generateNewHour(ldt) + ":" + t2.generateNewMinute(ldt));
-        // `t2.getDelta()` and `t2.getPay()` cannot be reliably tested since the Instant objects and Employee objects are initialized in the class
-    }
-
+    public void testTime() {}
      */
     @Test
     public void testFileHandler() {
@@ -105,10 +66,6 @@ public class TestAppObjects {
             } else {
                 System.out.println("File already exists.");
             }
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-        }
-        try {
             if (f2.createNewFile()) {
                 System.out.println("File created: " + f2.getName());
             } else {
@@ -128,6 +85,7 @@ public class TestAppObjects {
         assertEquals(FH.getEmployeesFile().getSource().getName(), "employees");
         assertEquals(FH.getTransactionsFile().getSource().getName(), "transactions");
         assertEquals(FH.getTimesFile().getSource().getName(), "times");
+        f1.delete();
     }
     @Test
     public void testInventoryLog() {
@@ -155,49 +113,11 @@ public class TestAppObjects {
         inventory.getSource().delete();
     }
     /*
+    // Cannot reliably test TransactionLog, TimeLog or EmployeeLog since they all rely on Time which has hardcoded link to EmployeeLog when calculating "pay" field
     @Test
-    public void testTransactionLog() {
-        TransactionLog transactions = new TransactionLog(new File("testtransactions"));
-        Employee e1 = new Employee(2, "John", 19.00);
-        Employee e2 = new Employee(5, "Jess", 24.00);
-        ArrayList<Item> items = new ArrayList<>();
-        ArrayList<Transaction> transList = new ArrayList<>();
-        items.add(new Item(2, "hammer", 12, 40.99));
-        items.add(new Item(3, "screwdriver", 7, 24.99));
-        transactions.addTransaction(e1, items);
-        Transaction t1 = new Transaction(1, e1, transactions.getTransactions().get(0).getRawDate(), items);
-        items.clear();
-        items.add(new Item(5, "bucket", 15, 12.99));
-        items.add(new Item(6, "table", 2, 144.99));
-        transactions.addTransaction(e2, items);
-        Transaction t2 = new Transaction(2, e2, transactions.getTransactions().get(1).getRawDate(), items);
-        transList.add(t1);
-        transList.add(t2);
-        assertEquals(transList, transactions.getTransactions());
-        transactions.getSource().delete();
-    }
-    /*
-    @Test
-    public void testTimeLogAndEmployeeLog() {
-        TimeLog times = new TimeLog(new File("testtimes"));
-        EmployeeLog employees = new EmployeeLog(new File("testemployees"));
-        times.addItem("hammer", "12", "45.99");
-        times.addItem("screwdriver", "5", "26.99");
-        times.addItem("bucket", "10", "12.99");
-        times.incrementItem(1); // increment first item "hammer"
-        times.decrementItem(2); // decrement second item "screwdriver"
-        times.removeItem(3); // remove item "bucket" (sets quantity to 0)
-        ObservableList<Item> items = times.getItems();
-        assertEquals(items.size(), 3);
-        testItem(items.get(0), 1, "hammer", 13, 45.99);
-        testItem(items.get(1), 2, "screwdriver", 4, 26.99);
-        testItem(items.get(2), 3, "bucket", 0, 12.99);
-        ObservableList<Item> filteredItems = times.getFilteredItems();
-        assertEquals(filteredItems.size(), 2);
-        testItem(filteredItems.get(0), 1, "hammer", 13, 45.99);
-        testItem(filteredItems.get(1), 2, "screwdriver", 4, 26.99);
-        times.getSource().delete();
-    }
+    public void testTransactionLog() {}
 
+    @Test
+    public void testTimeLogAndEmployeeLog() {}
      */
 }

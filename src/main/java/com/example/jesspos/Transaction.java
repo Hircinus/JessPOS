@@ -1,3 +1,5 @@
+// Stores Transaction objects used in TransactionLog
+// Depends on Time class
 package com.example.jesspos;
 
 import java.time.Instant;
@@ -20,6 +22,8 @@ public class Transaction implements Identifiable {
         this.date = transTime.getConpin();
         this.items = items;
         this.itemsCount = items.size();
+        for(Item i : items)
+            this.priceDelta += i.getPrice();
         this.priceDelta = Math.round(priceDelta * 100.0) / 100.0;
     }
 
@@ -33,6 +37,8 @@ public class Transaction implements Identifiable {
         this.itemsCount = items.size();
         priceDelta = 0.00;
     }
+
+    public String getDate() { return date; }
 
     public Instant getRawDate() {
         return rawDate;
