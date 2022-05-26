@@ -1,6 +1,5 @@
 # JessPOS
 ![Last commit badge](https://img.shields.io/github/last-commit/Hircinus/JessPOS)
-![Alerts](https://img.shields.io/lgtm/alerts/github/Hircinus/JessPOS)
 ![Code quality](https://img.shields.io/lgtm/grade/java/github/Hircinus/JessPOS)
 ![License](https://img.shields.io/github/license/Hircinus/JessPOS)
 
@@ -13,6 +12,7 @@ In the future, I hope to extend JessPOS to have a more sophisticated logging and
  - [Features](#features)
  - [Screenshots](#screenshots)
    - [Home page](#home-page)
+   - [Inventory page](#inventory-page)
    - [New transaction page](#new-transaction-page)
    - [Transactions history page](#transactions-history-page)
    - [Employees and timetables page page](#employees-and-timetables-page)
@@ -39,6 +39,8 @@ The transaction handling system allows workers to start transactions after being
 
 ### Home page
 ![Home page](https://github.com/Hircinus/JessPOS/blob/master/screenshots/jesspos_home.PNG)
+### Inventory page
+![Inventory page](https://github.com/Hircinus/JessPOS/blob/master/screenshots/jesspos_inventory.PNG)
 ### New transaction page
 ![New transaction page](https://github.com/Hircinus/JessPOS/blob/master/screenshots/jesspos_newtransaction.PNG)
 ### Transactions history page
