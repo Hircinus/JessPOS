@@ -9,7 +9,7 @@ In the future, I hope to extend JessPOS to have a more sophisticated logging and
 
 ## Table of contents
 
- - [Features](#features)
+ - [Description](#description)
  - [Screenshots](#screenshots)
    - [Home page](#home-page)
    - [Inventory page](#inventory-page)
@@ -21,19 +21,28 @@ In the future, I hope to extend JessPOS to have a more sophisticated logging and
    - [UML Diagram](#uml-diagram)
  - [Known limitations](#known-limitations)
 
-## Features
+## Description
 
-### Inventory Management
+### Features
+
+#### Inventory Management
 
 The inventory management system allows users to create new items with a name, quantity in stock, and price (and an automatically created SKU number). They can view previously created items, remove a selected item, edit a selected item or sort through the table to find what they're looking for faster. The quantities of items adjusts automatically when they are added to completed transactions.
 
-### Employee Timetable System
+#### Employee Timetable System
 
-The employee timetable system allows employees and managers to punch in when they come to their workstation, punch out at the end of their shift, and view their previous shifts as well as the durations of each shift, while also keeping track of the salary of each employee and displaying their pay per shift. This helps managers ensure payroll is accurate to when employees showed up, and allows employees to ensure that all the time they are at work is accounted for. Managers can also create new employee accounts using an administrator password with a name and a hardcoded password ID.
+The employee timetable system allows employees and managers to punch in when they come to their workstation, punch out at the end of their shift, and view their previous shifts as well as the durations of each shift, while also keeping track of the salary of each employee and displaying their pay per shift. This helps managers ensure payroll is accurate to when employees showed up, and allows employees to ensure that all the time they are at work is accounted for. Managers can also create new employee accounts using an administrator password with a name and an admin password, which can be changed (default is "p4$$w0rd").
 
-### Transaction Handling
+#### Transaction Handling
 
 The transaction handling system allows workers to start transactions after being signed in, add products to a transaction, remove any unwanted ones afterwards, and finally complete the transaction. All previous transactions are then viewable afterwards, with each transaction holding each item that was purchased as well as the employee that completed the transaction. Transactions are immutable after completion.
+
+### Development
+
+Developing this application was a fun endeavour, as its more of a personal project than a school one. Throughout my many customer service jobs I have used a variety of POS systems, but I always wondered how difficult it could be to make my own. Well, I certainly got that answer today. The main concept is that I store all my raw data in locally stored files that I then use methods of various file-handler classes to input, output, and edit data. This goes for everything from storing inventory items to keeping track of employee timetables.
+Other than some pretty basic Java classes, BootstrapFX was used to help style things a bit, and I used GridPanes to organize the content on my various pages.
+
+I think the biggest point of improvement for my project would be to have serialized my output (to make getting/setting items to a file more efficient), and a more sophisiticated hashing system for the administrator password (since simply hashing a String creates a number that can be achieved with other, different Strings, due to the limitations of basic hashing). A big issue I faced when creating the application was just trying to fathom the way everything was connected together, for instance, to show previous transactions I had to both get the previous transaction and then cross-reference the data from that transaction in the inventory to display the right information for each item. There were a lot of moving parts and the former potential solution in particular could've made things easier for me probably.
 
 ## Screenshots
 
@@ -60,21 +69,6 @@ FileHandler FH = new FileHandler(); // Initialize a new FileHandler to use throu
 FH.getEmployeesFile().getEmployees(); // returns an ObservableList<Employee> object
 ```
 The UI is lightly styled using BootstrapFX and uses GridPanes to organize the root.
-
-#### Custom classes and class constructors
-
-For most buttons in the app, they are created using a custom ``MenuBtn`` class that extends ``Button``, which adds some parameters to its constructor to automatically add the necessary style classes and tooltip text:
-```java
-private static class MenuBtn extends Button {
-    public MenuBtn(String text, String btnType, String tooltipText) {
-        super(text);
-        this.getStyleClass().addAll("btn", btnType);
-        this.setMinHeight(100);
-        this.setMaxSize(Double.MAX_VALUE, 150);
-        this.setTooltip(new Tooltip(tooltipText));
-    }
-}
-```
 
 ### UML diagram
 
