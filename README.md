@@ -15,7 +15,7 @@ In the future, I hope to extend JessPOS to have a more sophisticated logging and
    - [Inventory page](#inventory-page)
    - [New transaction page](#new-transaction-page)
    - [Transactions history page](#transactions-history-page)
-   - [Employees and timetables page page](#employees-and-timetables-page)
+   - [Employees and timetables page](#employees-and-timetables-page)
  - [Design](#design)
    - [Overview](#overview)
    - [UML Diagram](#uml-diagram)
